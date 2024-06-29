@@ -75,14 +75,15 @@ class Score(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.points = -1
+        self.font = pygame.font.Font(None, 48)  
+        self.color = (255, 255, 255) #White rgb
     
     def update_score(self):
         self.points += 1
-        print(self.points)
 
-    def render_score(self, screen):
-        score_surface = self.font.render(f'Score: {self.score}', True, self.color)
-        screen.blit(score_surface, (10, 10))
+    def render_score(self):
+        score_surface = self.font.render(str(self.points), True, self.color)
+        screen.blit(score_surface, (WIDTH // 2, HEIGHT // 7))  #Position
 
 
 # Global sprite groups
@@ -151,6 +152,7 @@ def run_game():
             running = False
 
         all_sprites.draw(screen)
+        score.render_score()
         pygame.display.flip()
         clock.tick(60)
 
