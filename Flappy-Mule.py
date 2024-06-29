@@ -14,7 +14,7 @@ WIDTH = 480
 HEIGHT = 500
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Flappy Bird")
+pygame.display.set_caption("Flappy Mule")
 clock = pygame.time.Clock()
 
 bg = pygame.image.load(f'{os.getcwd()}/background.png').convert_alpha()
@@ -24,7 +24,10 @@ class Bird(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         try:
-            self.image = pygame.image.load(f'{os.getcwd()}/bird.png').convert()
+            self.image = pygame.image.load(f'{os.getcwd()}/mule.png')
+            self.image = pygame.transform.scale(self.image, (110, 110)) #Resizing
+            self.image.convert_alpha()
+            self.image = crop_image(self.image)
         except pygame.error as e:
             print(f"Unable to load image: {e}")
             self.image = pygame.Surface((50, 50))
@@ -87,6 +90,12 @@ def create_pipe():
     # Add the pipes to the sprite groups
     all_sprites.add(top_pipe, bottom_pipe)
     pipes.add(top_pipe, bottom_pipe)
+
+def crop_image(image):
+    rect = image.get_bounding_rect()
+    cropped_image = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
+    cropped_image.blit(image, (0, 0), rect) #Identifies the tranparent parts and removes them
+    return cropped_image
 
 def run_game():
     global all_sprites, pipes, last_pipe_time
