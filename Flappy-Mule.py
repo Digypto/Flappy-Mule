@@ -56,8 +56,7 @@ class Bird(pygame.sprite.Sprite):
 class Pipe(pygame.sprite.Sprite):
     def __init__(self, position, height):
         super().__init__()
-        self.image = pygame.Surface([80, height])
-        self.image.fill(GREEN)
+        self.image = pygame.image.load(f'{os.getcwd()}/pipe.png')
         self.rect = self.image.get_rect()
         if position == "top":
             self.rect.bottom = height
