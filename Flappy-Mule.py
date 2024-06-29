@@ -26,15 +26,10 @@ text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
 class Bird(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        try:
-            self.image = pygame.image.load(f'{os.getcwd()}/mule.png')
-            self.image = pygame.transform.scale(self.image, (80, 80)) #Resizing
-            self.image.convert_alpha()
-            self.image = crop_image(self.image)
-        except pygame.error as e:
-            print(f"Unable to load image: {e}")
-            self.image = pygame.Surface((50, 50))
-            self.image.fill(RED)
+        self.image = pygame.image.load(f'{os.getcwd()}/mule.png')
+        self.image = pygame.transform.scale(self.image, (80, 80)) #Resizing
+        self.image.convert_alpha()
+        self.image = crop_image(self.image)
         self.rect = self.image.get_rect()
         self.rect.x = 50
         self.rect.y = HEIGHT // 2
@@ -115,6 +110,12 @@ def crop_image(image):
     cropped_image.blit(image, (0, 0), rect) #Identifies the tranparent parts and removes them
     return cropped_image
 
+def play_collision_sound():
+    mule_sound = f'{os.getcwd()}/mule.mp3'
+    pygame.mixer.init()
+    pygame.mixer.music.load(mule_sound)
+    pygame.mixer.music.play()
+
 def run_game():
     global all_sprites, pipes, last_pipe_time
 
@@ -148,6 +149,7 @@ def run_game():
 
         pipe_collision = pygame.sprite.spritecollide(bird, pipes, False)
         if pipe_collision:
+            play_collision_sound()
             running = False
 
         all_sprites.draw(screen)
