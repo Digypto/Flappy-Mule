@@ -70,6 +70,21 @@ class Pipe(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
+
+class Score(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.points = -1
+    
+    def update_score(self):
+        self.points += 1
+        print(self.points)
+
+    def render_score(self, screen):
+        score_surface = self.font.render(f'Score: {self.score}', True, self.color)
+        screen.blit(score_surface, (10, 10))
+
+
 # Global sprite groups
 all_sprites = pygame.sprite.Group()
 pipes = pygame.sprite.Group()
@@ -107,6 +122,7 @@ def run_game():
     pipes.empty()
 
     bird = Bird()
+    score = Score()
     all_sprites.add(bird)
 
     running = True
@@ -128,6 +144,7 @@ def run_game():
         if current_time - last_pipe_time > PIPE_INTERVAL:
             create_pipe()
             last_pipe_time = current_time
+            score.update_score()
 
         pipe_collision = pygame.sprite.spritecollide(bird, pipes, False)
         if pipe_collision:
