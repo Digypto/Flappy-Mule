@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 import random
+import os
 
 # Initialize pygame
 pygame.init()
@@ -16,13 +17,14 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Flappy Bird")
 clock = pygame.time.Clock()
 
-bg = pygame.image.load("/Users/emil/Desktop/Flappy Bird/background.png").convert_alpha()
+bg = pygame.image.load(f'{os.getcwd()}/background.png').convert_alpha()
+
 
 class Bird(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         try:
-            self.image = pygame.image.load("/Users/emil/Desktop/Flappy Bird/bird.png").convert()
+            self.image = pygame.image.load(f'{os.getcwd()}/bird.png').convert()
         except pygame.error as e:
             print(f"Unable to load image: {e}")
             self.image = pygame.Surface((50, 50))
