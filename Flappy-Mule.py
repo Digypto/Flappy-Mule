@@ -19,13 +19,16 @@ clock = pygame.time.Clock()
 
 bg = pygame.image.load(f'{os.getcwd()}/background.png').convert_alpha()
 
+font = pygame.font.Font(None, 200)
+text = font.render('FOOO', True, (255, 0, 0))
+text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
 
 class Bird(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         try:
             self.image = pygame.image.load(f'{os.getcwd()}/mule.png')
-            self.image = pygame.transform.scale(self.image, (110, 110)) #Resizing
+            self.image = pygame.transform.scale(self.image, (70, 70)) #Resizing
             self.image.convert_alpha()
             self.image = crop_image(self.image)
         except pygame.error as e:
@@ -135,7 +138,10 @@ def run_game():
         clock.tick(60)
 
     # 4-second delay after dying
-    pygame.time.wait(4000)
+    screen.blit(text, text_rect)
+    pygame.display.flip()
+
+    pygame.time.wait(4000) # 4-second delay after dying
     return True
 
 print("Starting the game...")
