@@ -28,7 +28,7 @@ class Bird(pygame.sprite.Sprite):
         super().__init__()
         try:
             self.image = pygame.image.load(f'{os.getcwd()}/mule.png')
-            self.image = pygame.transform.scale(self.image, (70, 70)) #Resizing
+            self.image = pygame.transform.scale(self.image, (80, 80)) #Resizing
             self.image.convert_alpha()
             self.image = crop_image(self.image)
         except pygame.error as e:
