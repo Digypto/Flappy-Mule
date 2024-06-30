@@ -2,8 +2,16 @@ import pygame
 from pygame.locals import *
 import random
 import os
+from db.db_operations import save_score, get_high_scores
+from db.db_connection import get_db_connection, retrieve_db_credentials
 
 # Initialize pygame
+credential_dict = retrieve_db_credentials()
+user = credential_dict.get("user")
+password = credential_dict.get("password")
+host = credential_dict.get("host")
+appname = credential_dict.get("appname")
+client = get_db_connection(user, password, host, appname)
 pygame.init()
 pygame.mixer.init()
 pygame.font.init()  # Initialize the font module
@@ -270,6 +278,7 @@ def draw_button(text: str, font: pygame.font.Font, x: int, y: int, width: int, h
     screen.blit(button_text, (x + (width - button_text.get_width()) // 2, y + (height - button_text.get_height()) // 2))
     return False
 
+
 def game_over_screen(score: Score) -> bool:
     """
     Displays the game over screen with the final score and a "Play Again" button.
@@ -284,6 +293,9 @@ def game_over_screen(score: Score) -> bool:
     bool
         True if the player wants to play again, otherwise False.
     """
+    save_score(client, score.points)  # Save the score to the database
+    high_scores = get_high_scores(client)  # Retrieve the top scores
+
     game_over_text = "FOOO"
     text_x = WIDTH // 2 - font.size(game_over_text)[0] // 2
     text_y = HEIGHT // 2 - font.size(game_over_text)[1] // 2 - 150
@@ -294,6 +306,10 @@ def game_over_screen(score: Score) -> bool:
     score_x = WIDTH // 3 - font.size(str(score.points))[1] // 2
     score_y = text_y + font.size(game_over_text)[1] + 20  # Position below "FOOO" text
     draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
+
+    for score_doc in high_scores.find():
+        score_value = score_doc.get('score')  # Accessing the 'score' field from the document
+        print(f"Score: {score_value}")
 
     # Draw "Play Again" button
     button_x = WIDTH // 2 - 100
@@ -374,3 +390,5 @@ while keep_running:
 
 pygame.quit()
 exit()
+
+
