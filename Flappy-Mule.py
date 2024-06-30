@@ -21,10 +21,10 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Flappy Mule")
 clock = pygame.time.Clock()
 
-bg = pygame.image.load(f'{os.getcwd()}/background.png').convert_alpha()
+bg = pygame.image.load(f'{os.getcwd()}/assets/background.png').convert_alpha()
 
 # Load custom font from Google Fonts
-font_path = os.path.join(os.getcwd(), 'BebasNeue-Regular.ttf')
+font_path = f'{os.getcwd()}/assets/BebasNeue-Regular.ttf'
 font = pygame.font.Font(font_path, 160)
 button_font = pygame.font.Font(font_path, 48)  # Smaller font for the button
 score_font = pygame.font.Font(font_path, 120)  # Font for the score
@@ -44,7 +44,7 @@ class Mule(pygame.sprite.Sprite):
     """
     def __init__(self) -> None:
         super().__init__()
-        self.image = pygame.image.load(f'{os.getcwd()}/mule.png')
+        self.image = pygame.image.load(f'{os.getcwd()}/assets/mule.png')
         self.image = pygame.transform.scale(self.image, (80, 80))  # Resizing
         self.image.convert_alpha()
         self.image = crop_image(self.image)
@@ -85,7 +85,7 @@ class Pipe(pygame.sprite.Sprite):
     """
     def __init__(self, position: str, height: int) -> None:
         super().__init__()
-        self.image = pygame.image.load(f'{os.getcwd()}/fence.png')
+        self.image = pygame.image.load(f'{os.getcwd()}/assets/fence.png')
         self.rect = self.image.get_rect()
         if position == "top":
             self.rect.bottom = height
@@ -111,15 +111,15 @@ class Score(pygame.sprite.Sprite):
         The current score.
     font : pygame.font.Font
         The font used to render the score.
-    color : Tuple[int, int, int]
+    color : tuple[int, int, int]
         The color of the score text.
-    outline_color : Tuple[int, int, int]
+    outline_color : tuple[int, int, int]
         The color of the score text outline.
     """
     def __init__(self) -> None:
         super().__init__()
         self.points = -1
-        self.font = pygame.font.Font('BebasNeue-Regular.ttf', 48)
+        self.font = pygame.font.Font('assets/BebasNeue-Regular.ttf', 48)
         self.color = (255, 255, 255)  # White rgb
         self.outline_color = BLACK
 
@@ -194,7 +194,7 @@ def play_collision_sound() -> None:
     """
     Plays a sound effect when a collision occurs.
     """
-    mule_sound = f'{os.getcwd()}/mule.mp3'
+    mule_sound = f'{os.getcwd()}/assets/mule.mp3'
     pygame.mixer.init()
     pygame.mixer.music.load(mule_sound)
     pygame.mixer.music.play()
