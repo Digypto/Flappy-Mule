@@ -1,5 +1,6 @@
 from db.db_connection import get_db_connection, retrieve_db_credentials
 from pymongo import MongoClient
+import pymongo
 
 
 credential_dict = retrieve_db_credentials()
@@ -22,13 +23,18 @@ def save_score(client: MongoClient, score: int) -> None:
     """
     try:
         highscores_col = check_and_create_collection(client)
-        # Retrieve top 10 scores
-        data = {"user": "test_mule", "score": score}
-        highscores_col.insert_one(data)
+        num_documents = highscores_col.count_documents({})
+        lowest_score_doc = highscores_col.find().sort('score', pymongo.ASCENDING).limit(1)[0]['score']
+        if num_documents < 5:
+            data = {"user": "test_mule", "score": score}
+            highscores_col.insert_one(data)
+        if score > lowest_score_doc and num_documents >= 5:
+            data = {"user": "test_mule", "score": score}
+            highscores_col.insert_one(data)
     except Exception as e:
         print(f"Error saving score: {e}")
 
-def get_high_scores(client: MongoClient, limit: int = 10) -> list:
+def get_high_scores(client: MongoClient) -> list:
     """
     Retrieves the top high scores from the 'highscores' collection in MongoDB.
 
@@ -47,7 +53,8 @@ def get_high_scores(client: MongoClient, limit: int = 10) -> list:
     try:
         db = client["FlappyMule"]
         highscores_col = db['FlappyMuleScores']
-        return highscores_col
+        sorted_scores = highscores_col.find().sort('score', pymongo.DESCENDING)
+        return sorted_scores
     except Exception as e:
         print(f"Error retrieving high scores: {e}")
 

@@ -307,7 +307,7 @@ def game_over_screen(score: Score) -> bool:
     score_y = text_y + font.size(game_over_text)[1] + 20  # Position below "FOOO" text
     draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
 
-    for score_doc in high_scores.find():
+    for score_doc in high_scores:
         score_value = score_doc.get('score')  # Accessing the 'score' field from the document
         print(f"Score: {score_value}")
 
