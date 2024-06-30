@@ -337,14 +337,15 @@ def main_menu():
     """
     Displays the main menu and waits for the user to click the "Play" button.
     """
-    button_x = WIDTH // 2 - 100
+    button_x = WIDTH // 2 - 125
     button_y = HEIGHT // 2 - 35
     button_width = 200
     button_height = 70
 
     while True:
         screen.blit(bg, (0, 0))
-        play = draw_button("Play", button_font, button_x, button_y, button_width, button_height, BLACK, LIGHT_GRAY)
+        play = draw_button("Play", button_font, button_x, button_y, button_width + 50, button_height, BLACK, LIGHT_GRAY)
+        leaderboard = draw_button("Leaderboard", button_font, button_x, button_y + 100, button_width + 50, button_height, BLACK, LIGHT_GRAY)
         pygame.display.flip()
 
         for event in pygame.event.get():
