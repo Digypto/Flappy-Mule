@@ -24,13 +24,14 @@ def save_score(client: MongoClient, score: int) -> None:
     try:
         highscores_col = check_and_create_collection(client)
         num_documents = highscores_col.count_documents({})
-        lowest_score_doc = highscores_col.find().sort('score', pymongo.ASCENDING).limit(1)[0]['score']
+        lowest_score_doc = highscores_col.find().sort('score', pymongo.ASCENDING).limit(1)
         if num_documents < 5:
             data = {"user": "test_mule", "score": score}
             highscores_col.insert_one(data)
-        if score > lowest_score_doc and num_documents >= 5:
+        if score > lowest_score_doc[0]['score'] and num_documents >= 5:
             data = {"user": "test_mule", "score": score}
             highscores_col.insert_one(data)
+            highscores_col.delete_one({"_id": lowest_score_doc[0]['_id']}) #Deleting the worst entry
     except Exception as e:
         print(f"Error saving score: {e}")
 
@@ -53,7 +54,7 @@ def get_high_scores(client: MongoClient) -> list:
     try:
         db = client["FlappyMule"]
         highscores_col = db['FlappyMuleScores']
-        sorted_scores = highscores_col.find().sort('score', pymongo.DESCENDING)
+        sorted_scores = highscores_col.find().sort('score', pymongo.DESCENDING).limit(5)
         return sorted_scores
     except Exception as e:
         print(f"Error retrieving high scores: {e}")

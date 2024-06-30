@@ -317,6 +317,7 @@ def game_over_screen(score: Score) -> bool:
     button_width = 200
     button_height = 70
 
+
     while True:
         play_again = draw_button("Play Again", button_font, button_x, button_y, button_width, button_height, BLACK, LIGHT_GRAY)
         pygame.display.flip()
@@ -331,6 +332,27 @@ def game_over_screen(score: Score) -> bool:
                     return True
             if play_again:
                 return True
+            
+def main_menu():
+    """
+    Displays the main menu and waits for the user to click the "Play" button.
+    """
+    button_x = WIDTH // 2 - 100
+    button_y = HEIGHT // 2 - 35
+    button_width = 200
+    button_height = 70
+
+    while True:
+        screen.blit(bg, (0, 0))
+        play = draw_button("Play", button_font, button_x, button_y, button_width, button_height, BLACK, LIGHT_GRAY)
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if play:
+                return
 
 def run_game() -> bool:
     """
@@ -384,9 +406,11 @@ def run_game() -> bool:
 
     return game_over_screen(score)
 
-keep_running = True
-while keep_running:
-    keep_running = run_game()
+if __name__ == "__main__":
+    main_menu()
+    while True:
+        run_game()
+
 
 pygame.quit()
 exit()
