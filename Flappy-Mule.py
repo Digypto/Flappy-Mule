@@ -308,7 +308,7 @@ def game_over_screen(score: Score) -> bool:
     score_y = text_y + 175 # Position below "FOOO" text
     draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
 
-
+    death_time = pygame.time.get_ticks() # record the time when the mule dies
 
     for score_doc in high_scores:
         score_value = score_doc.get('score')  # Accessing the 'score' field from the document
@@ -338,8 +338,9 @@ def game_over_screen(score: Score) -> bool:
                 exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    pygame.time.wait(1000)  # Small delay after dying
-                    return True
+                    current_time = pygame.time.get_ticks()
+                    if current_time - death_time >= 2000:  # check if 2 seconds have passed
+                        run_game()
             if play_again:
                 run_game()
             if main_menu_button:
