@@ -165,7 +165,7 @@ def create_pipe() -> None:
     global all_sprites, pipes, last_pipe_time
 
     # Define the gap size between top and bottom pipes (adjust if the game is too easy or hard)
-    gap_size = 200
+    gap_size = 170
 
     # Randomly determine the position of the gap
     min_gap_position = 100
