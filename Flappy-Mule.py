@@ -345,7 +345,46 @@ def game_over_screen(score: Score) -> bool:
             if main_menu_button:
                 main_menu()
 
+def display_leaderboard():
+    leaderboard_font = pygame.font.Font(font_path, 36)
+    title_font = pygame.font.Font(font_path, 72)
+    back_button_font = pygame.font.Font(font_path, 36)
 
+    high_scores = get_high_scores(client)
+
+    running = True
+    while running:
+        screen.blit(bg, (0,0))
+
+        # Draw title
+        leaderboard_title = "Leaderboard"
+        title_x = WIDTH // 2 - title_font.size(leaderboard_title)[0] // 2
+        title_y = HEIGHT // 8
+        draw_text_with_outline(leaderboard_title, title_font, WHITE, BLACK, title_x, title_y)
+
+        # Draw scores
+        for i, score_doc in enumerate(high_scores):
+            score_value = score_doc.get('score')  # Accessing the 'score' field from the document
+            score_text = f"{i + 1}. {score_value}"
+            text_x = WIDTH // 2 - leaderboard_font.size(score_text)[0] // 2
+            text_y = title_y + (i + 1) * 50
+            draw_text_with_outline(score_text, leaderboard_font, WHITE, BLACK, text_x, text_y)
+        
+        # Draw "Back" button
+        back_button_x = WIDTH // 2 - 100
+        back_button_y = HEIGHT - 100
+        back_button_width = 200
+        back_button_height = 70
+        back = draw_button("Back", back_button_font, back_button_x, back_button_y, back_button_width, back_button_height, BLACK, LIGHT_GRAY)
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if back:
+                main_menu()
             
 def main_menu():
     """
@@ -370,8 +409,17 @@ def main_menu():
 
     while True:
         screen.blit(bg, (0, 0))
+
+        # Draw title
+        flappy_title = "Flappy Mule"
+        title_font = pygame.font.Font(font_path, 90)
+        flappy_x = WIDTH // 2 - title_font.size(flappy_title)[0] // 2
+        flappy_y = HEIGHT // 6
+        draw_text_with_outline(flappy_title, title_font, WHITE, BLACK, flappy_x, flappy_y)
+
+
         play = draw_button("Play", button_font, button_x, button_y, button_width + 50, button_height, BLACK, LIGHT_GRAY)
-        draw_button("Leaderboard", button_font, button_x, button_y + 100, button_width + 50, button_height, BLACK, LIGHT_GRAY)
+        leaderboard = draw_button("Leaderboard", button_font, button_x, button_y + 100, button_width + 50, button_height, BLACK, LIGHT_GRAY)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -379,6 +427,8 @@ def main_menu():
                 exit()
             if play:
                 run_game()
+            if leaderboard:
+                display_leaderboard()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if input_rect.collidepoint(event.pos):
@@ -433,7 +483,7 @@ def run_game() -> bool:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.exit()
+                exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     mule.jump()
