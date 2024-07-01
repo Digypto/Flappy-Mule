@@ -4,7 +4,6 @@ import random
 import os
 from db.db_operations import save_score, get_high_scores
 from db.db_connection import get_db_connection, retrieve_db_credentials
-import sys
 
 # Initialize pygame
 credential_dict = retrieve_db_credentials()
@@ -308,8 +307,17 @@ def game_over_screen(score: Score) -> bool:
     score_y = text_y + 175 # Position below "FOOO" text
     draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
 
+    button_x = 0
+    button_y = 300
+    button_width = WIDTH - 100
+    button_height = 210
+
+
     for score_doc in high_scores:
         score_value = score_doc.get('score')  # Accessing the 'score' field from the document
+        pop_up_string = "Wow, you're in the top 5 biggest mules \n of all time! Enter a username to get on the leaderboard."
+        #draw_button(pop_up_string, button_font, button_x, button_y, button_width, button_height, BLACK, LIGHT_GRAY)
+
 
     # Draw "Play Again" button
     button_x = WIDTH // 2 - 100
@@ -341,11 +349,15 @@ def game_over_screen(score: Score) -> bool:
                 run_game()
             if main_menu_button:
                 main_menu()
+
+def username_input_box():
+    pass
             
 def main_menu():
     """
     Displays the main menu and waits for the user to click the "Play" button.
     """
+
     button_x = WIDTH // 2 - 125
     button_y = HEIGHT // 2 - 35
     button_width = 200
