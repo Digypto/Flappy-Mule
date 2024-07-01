@@ -4,6 +4,7 @@ import random
 import os
 from db.db_operations import save_score, get_high_scores
 from db.db_connection import get_db_connection, retrieve_db_credentials
+import sys
 
 # Initialize pygame
 credential_dict = retrieve_db_credentials()
@@ -165,7 +166,7 @@ def create_pipe() -> None:
     global all_sprites, pipes, last_pipe_time
 
     # Define the gap size between top and bottom pipes (adjust if the game is too easy or hard)
-    gap_size = 170
+    gap_size = 200
 
     # Randomly determine the position of the gap
     min_gap_position = 100
@@ -309,6 +310,7 @@ def game_over_screen(score: Score) -> bool:
 
     for score_doc in high_scores:
         score_value = score_doc.get('score')  # Accessing the 'score' field from the document
+        print(f"Score: {score_value}")
 
     # Draw "Play Again" button
     button_x = WIDTH // 2 - 100
@@ -344,7 +346,7 @@ def main_menu():
     while True:
         screen.blit(bg, (0, 0))
         play = draw_button("Play", button_font, button_x, button_y, button_width + 50, button_height, BLACK, LIGHT_GRAY)
-        leaderboard = draw_button("Leaderboard", button_font, button_x, button_y + 100, button_width + 50, button_height, BLACK, LIGHT_GRAY)
+        draw_button("Leaderboard", button_font, button_x, button_y + 100, button_width + 50, button_height, BLACK, LIGHT_GRAY)
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -375,6 +377,9 @@ def run_game() -> bool:
     running = True
     while running:
         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     mule.jump()
