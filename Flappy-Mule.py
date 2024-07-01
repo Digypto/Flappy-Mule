@@ -309,7 +309,6 @@ def game_over_screen(score: Score) -> bool:
 
     for score_doc in high_scores:
         score_value = score_doc.get('score')  # Accessing the 'score' field from the document
-        print(f"Score: {score_value}")
 
     # Draw "Play Again" button
     button_x = WIDTH // 2 - 100
