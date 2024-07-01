@@ -338,7 +338,7 @@ def game_over_screen(score: Score) -> bool:
                     pygame.time.wait(1000)  # Small delay after dying
                     return True
             if play_again:
-                return True
+                run_game()
             if main_menu_button:
                 main_menu()
             
@@ -362,7 +362,7 @@ def main_menu():
                 pygame.quit()
                 exit()
             if play:
-                return
+                run_game()
 
 def run_game() -> bool:
     """
