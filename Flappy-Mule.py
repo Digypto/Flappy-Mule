@@ -304,23 +304,29 @@ def game_over_screen(score: Score) -> bool:
 
     # Render the score below the "FOOO" text
     score_label = "Score: " + str(score.points)
-    score_x = WIDTH // 3 - font.size(str(score.points))[1] // 2
-    score_y = text_y + font.size(game_over_text)[1] + 20  # Position below "FOOO" text
+    score_x = WIDTH // 3 - font.size(str(score.points))[1] // 2 + 25
+    score_y = text_y + 175 # Position below "FOOO" text
     draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
 
     for score_doc in high_scores:
         score_value = score_doc.get('score')  # Accessing the 'score' field from the document
-        print(f"Score: {score_value}")
 
     # Draw "Play Again" button
     button_x = WIDTH // 2 - 100
-    button_y = score_y + font.size(str(score.points))[1] - 10
+    button_y = score_y + 150
     button_width = 200
     button_height = 70
+
+    # Draw "Main menu" button
+    menu_button_x = WIDTH // 2 - 100
+    menu_button_y = button_y + 75
+    menu_button_width = 200
+    menu_button_height = 70
 
 
     while True:
         play_again = draw_button("Play Again", button_font, button_x, button_y, button_width, button_height, BLACK, LIGHT_GRAY)
+        main_menu_button = draw_button("Main menu", button_font, menu_button_x, menu_button_y, menu_button_width, menu_button_height, BLACK, LIGHT_GRAY)
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -333,6 +339,8 @@ def game_over_screen(score: Score) -> bool:
                     return True
             if play_again:
                 return True
+            if main_menu_button:
+                main_menu()
             
 def main_menu():
     """
@@ -404,7 +412,7 @@ def run_game() -> bool:
             running = False
 
         all_sprites.draw(screen)
-        if running:
+        if running and score.points >= 0:
             score.render_score(WIDTH // 2, HEIGHT // 7)
         pygame.display.flip()
         clock.tick(60)
