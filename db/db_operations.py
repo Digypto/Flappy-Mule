@@ -1,4 +1,4 @@
-from db.db_connection import get_db_connection, retrieve_db_credentials
+from db.db_connection import retrieve_db_credentials
 from pymongo import MongoClient
 import pymongo
 

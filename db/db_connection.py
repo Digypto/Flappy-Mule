@@ -1,4 +1,3 @@
-import psycopg2
 import os
 from pymongo import MongoClient
 
@@ -25,31 +24,12 @@ def get_db_connection(user: str, password: str, host: str, appname: str) -> Mong
     pymongo.MongoClient
         The MongoDB client object.
     """
-
     try:
         conn_str = f"mongodb+srv://{user}:{password}@{host}/?retryWrites=true&w=majority&appName={appname}"
         client = MongoClient(conn_str)
         return client
     except Exception as e:
         print(f"Error connecting to MongoDB: {e}")
-
-def create_highscores_collection(client: MongoClient) -> None:
-    """
-    Creates the 'highscores' collection in MongoDB if it does not exist.
-
-    Parameters
-    ----------
-    client : pymongo.MongoClient
-        MongoDB client object.
-    """
-    try:
-        mydb.list_collection_names()
-        mydb = client["FlappyMule"]
-
-        mycol = mydb["FlappyMulePlayers"]
-        print("Collection 'highscores' created successfully.")
-    except Exception as e:
-        print(f"Error creating 'highscores' collection: {e}")
 
 def retrieve_db_credentials():
     credential_dict = {}
