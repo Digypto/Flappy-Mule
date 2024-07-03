@@ -2,9 +2,10 @@ import pygame
 from pygame.locals import *
 import random
 import os
-import ctypes
 from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
 from db.db_connection import get_db_connection, retrieve_db_credentials
+import tkinter as tk
+from tkinter import messagebox
 
 
 # Initialize pygame
@@ -362,7 +363,9 @@ def ask_username_screen(player: Player):
             if event.type == pygame.KEYDOWN:
                 if active:
                     if event.key == pygame.K_RETURN:
-                        ctypes.windll.user32.MessageBoxW(0, "Score saved!", "Popup", 0)
+                        root = tk.Tk()
+                        root.withdraw()
+                        messagebox.showinfo("Popup", "Score saved!")
                         player.update_name(user_text)
                         save_score(client, player.points, player.name)  # Save the score to the database
                         user_text = ''
