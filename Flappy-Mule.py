@@ -282,6 +282,7 @@ def draw_button(text: str, font: pygame.font.Font, x: int, y: int, width: int, h
 
 
 def ask_username_screen(score: Score):
+
     save_score(client, score.points)  # Save the score to the database
 
     score_label = "Score: " + str(score.points)
@@ -308,16 +309,30 @@ def ask_username_screen(score: Score):
     yes_width = 100
     yes_height = 70
 
+
+    base_font = pygame.font.Font(None, 32)
+    user_text = ''
+
+    # Create input rectangle
+    input_box_y = username_y + 50
+    input_rect = pygame.Rect(WIDTH // 2 - 175, input_box_y, 200, 50)
+
     # Draw "No" button
-    no_button_x = WIDTH // 2
-    no_button_y = yes_y
-    no_button_width = 100
-    no_button_height = 70
+    no_button_x = WIDTH // 2 - 115
+    no_button_y = input_box_y + 75
+    no_button_width = 200
+    no_button_height = 50
+
+    color_active = pygame.Color(((200,200,200))) #light gray
+    color_passive = pygame.Color('black')
+    color = color_passive
+
+    active = False
 
 
     while True:
-        yes_button = draw_button("Yes", button_font, yes_x, yes_y, yes_width, yes_height, BLACK, LIGHT_GRAY)
-        no_button = draw_button("No", button_font, no_button_x, no_button_y, no_button_width, no_button_height, BLACK, LIGHT_GRAY)
+        #yes_button = draw_button("Yes", button_font, yes_x, yes_y, yes_width, yes_height, BLACK, LIGHT_GRAY)
+        no_button = draw_button("No thanks", button_font, no_button_x, no_button_y, no_button_width, no_button_height, BLACK, LIGHT_GRAY)
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -326,6 +341,33 @@ def ask_username_screen(score: Score):
                 exit()
             if no_button:
                 main_menu()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if input_rect.collidepoint(event.pos):
+                    active = True
+                else:
+                    active = False
+
+            if event.type == pygame.KEYDOWN:
+                if active:
+                    if event.key == pygame.K_BACKSPACE:
+                        user_text = user_text[:-1]
+                    else:
+                        user_text += event.unicode
+
+        if active:
+            color = color_active
+        else:
+            color = color_passive
+
+        pygame.draw.rect(screen, color, input_rect)
+
+        if user_text == '':
+            text_surface = base_font.render("The name of the awesome mule", True, (180, 180, 180))  # Lighter color for placeholder
+        else:
+            text_surface = base_font.render(user_text, True, (255, 255, 255))  # White color for user input
+        screen.blit(text_surface, (input_rect.x + 5, input_rect.y + 5))
+
+        input_rect.w = max(200, text_surface.get_width() + 10)
 
 
 def game_over_screen(score: Score) -> bool:
@@ -394,6 +436,7 @@ def game_over_screen(score: Score) -> bool:
             if main_menu_button:
                 main_menu()
 
+
 def display_leaderboard():
     leaderboard_font = pygame.font.Font(font_path, 36)
     title_font = pygame.font.Font(font_path, 72)
@@ -444,18 +487,7 @@ def main_menu():
     button_y = HEIGHT // 2 - 35
     button_width = 200
     button_height = 70
-    base_font = pygame.font.Font(None, 32)
-    user_text = ''
-
-    # Create input rectangle
-    input_rect = pygame.Rect(10, 10, 200, 50)
-
-    color_active = pygame.Color('lightskyblue3')
-    color_passive = pygame.Color('chartreuse4')
-    color = color_passive
-
-    active = False
-
+    
     while True:
         screen.blit(bg, (0, 0))
 
@@ -478,34 +510,6 @@ def main_menu():
                 run_game()
             if leaderboard:
                 display_leaderboard()
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if input_rect.collidepoint(event.pos):
-                    active = True
-                else:
-                    active = False
-
-            if event.type == pygame.KEYDOWN:
-                if active:
-                    if event.key == pygame.K_BACKSPACE:
-                        user_text = user_text[:-1]
-                    else:
-                        user_text += event.unicode
-
-        if active:
-            color = color_active
-        else:
-            color = color_passive
-
-        pygame.draw.rect(screen, color, input_rect)
-
-        if user_text == '':
-            text_surface = base_font.render("Enter a username", True, (180, 180, 180))  # Lighter color for placeholder
-        else:
-            text_surface = base_font.render(user_text, True, (255, 255, 255))  # White color for user input
-        screen.blit(text_surface, (input_rect.x + 5, input_rect.y + 5))
-
-        input_rect.w = max(200, text_surface.get_width() + 10)
 
         pygame.display.flip()
 
