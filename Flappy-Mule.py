@@ -4,8 +4,7 @@ import random
 import os
 from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
 from db.db_connection import get_db_connection, retrieve_db_credentials
-import tkinter as tk
-from tkinter import messagebox
+from pymsgbox import *
 
 
 # Initialize pygame
@@ -363,9 +362,7 @@ def ask_username_screen(player: Player):
             if event.type == pygame.KEYDOWN:
                 if active:
                     if event.key == pygame.K_RETURN:
-                        root = tk.Tk()
-                        root.withdraw()
-                        messagebox.showinfo("Popup", "Score saved!")
+                        alert(text='Score saved!', title='Popup', button='OK')
                         player.update_name(user_text)
                         save_score(client, player.points, player.name)  # Save the score to the database
                         user_text = ''
