@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 import random
 import os
+import ctypes
 from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
 from db.db_connection import get_db_connection, retrieve_db_credentials
 
@@ -349,6 +350,10 @@ def ask_username_screen(score: Score):
 
             if event.type == pygame.KEYDOWN:
                 if active:
+                    if event.key == pygame.K_RETURN:
+                        ctypes.windll.user32.MessageBoxW(0, "Score saved!", "Popup", 0)
+                        user_text = ''
+                        main_menu()
                     if event.key == pygame.K_BACKSPACE:
                         user_text = user_text[:-1]
                     else:
