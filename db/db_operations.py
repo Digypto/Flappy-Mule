@@ -25,10 +25,10 @@ def save_score(client: MongoClient, score: int, name: str) -> None:
         highscores_col = check_and_create_collection(client)
         num_documents = highscores_col.count_documents({})
         lowest_score_doc = highscores_col.find().sort('score', pymongo.ASCENDING).limit(1)
-        if num_documents < 5:
+        if num_documents < 5 and name != "":
             data = {"user": name, "score": score}
             highscores_col.insert_one(data)
-        if score > lowest_score_doc[0]['score'] and num_documents >= 5:
+        if score > lowest_score_doc[0]['score'] and num_documents >= 5 and name != "":
             data = {"user": name, "score": score}
             highscores_col.insert_one(data)
             highscores_col.delete_one({"_id": lowest_score_doc[0]['_id']}) #Deleting the worst entry

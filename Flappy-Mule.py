@@ -149,6 +149,10 @@ class Player(pygame.sprite.Sprite):
         """
         self.name = name
 
+    def get_name(self) -> str:
+
+        return self.name
+
     def render_score(self, x: int, y: int) -> None:
         """
         Renders the score on the screen.
@@ -293,8 +297,6 @@ def draw_button(text: str, font: pygame.font.Font, x: int, y: int, width: int, h
 
 def ask_username_screen(player: Player):
 
-    save_score(client, player.points, player.name)  # Save the score to the database
-
     score_label = "Score: " + str(player.points)
     score_x = WIDTH // 3 - font.size(str(player.points))[1] // 2
     #score_y = text_y + 175 # Position below "FOOO" text
@@ -361,7 +363,8 @@ def ask_username_screen(player: Player):
                 if active:
                     if event.key == pygame.K_RETURN:
                         ctypes.windll.user32.MessageBoxW(0, "Score saved!", "Popup", 0)
-                        Player().update_name(user_text)
+                        player.update_name(user_text)
+                        save_score(client, player.points, player.name)  # Save the score to the database
                         user_text = ''
                         main_menu()
                     if event.key == pygame.K_BACKSPACE:
@@ -399,7 +402,6 @@ def game_over_screen(player: Player) -> bool:
     bool
         True if the player wants to play again, otherwise False.
     """
-    save_score(client, player.points, player.name)  # Save the score to the database
     high_scores = get_high_scores(client)  # Retrieve the top scores
 
     game_over_text = "FOOO"
@@ -581,7 +583,6 @@ def run_game() -> bool:
         pygame.display.flip()
         clock.tick(60)
 
-    player.points = get_worst_score_in_db(client)[0] + 1
 
     if player.points > get_worst_score_in_db(client)[0] or get_worst_score_in_db(client)[1] < 5: #check if there are under 5 entries in db or the user is better than the worst score in db
         return ask_username_screen(player)
