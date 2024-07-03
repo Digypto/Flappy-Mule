@@ -2,7 +2,8 @@ import pygame
 from pygame.locals import *
 import random
 import os
-from db.db_operations import save_score, get_high_scores
+import ctypes
+from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
 from db.db_connection import get_db_connection, retrieve_db_credentials
 
 
@@ -37,6 +38,7 @@ font_path = f'{os.getcwd()}/assets/BebasNeue-Regular.ttf'
 font = pygame.font.Font(font_path, 160)
 button_font = pygame.font.Font(font_path, 48)  # Smaller font for the button
 score_font = pygame.font.Font(font_path, 120)  # Font for the score
+leaderboard_font = pygame.font.Font(font_path, 28)
 
 class Mule(pygame.sprite.Sprite):
     """
@@ -110,14 +112,16 @@ class Pipe(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
-class Score(pygame.sprite.Sprite):
+class Player(pygame.sprite.Sprite):
     """
-    Represents the score in the game.
+    Represents the user in the game.
 
     Attributes
     ----------
     points : int
         The current score.
+    name : str
+        The name of the user (if asked)
     font : pygame.font.Font
         The font used to render the score.
     color : tuple[int, int, int]
@@ -128,6 +132,7 @@ class Score(pygame.sprite.Sprite):
     def __init__(self) -> None:
         super().__init__()
         self.points = -1
+        self.name = ""
         self.font = pygame.font.Font('assets/BebasNeue-Regular.ttf', 48)
         self.color = (255, 255, 255)  # White rgb
         self.outline_color = BLACK
@@ -137,6 +142,16 @@ class Score(pygame.sprite.Sprite):
         Increases the score by 1 point.
         """
         self.points += 1
+
+    def update_name(self, name) -> None:
+        """
+        Adds a name to the user.
+        """
+        self.name = name
+
+    def get_name(self) -> str:
+
+        return self.name
 
     def render_score(self, x: int, y: int) -> None:
         """
@@ -280,7 +295,100 @@ def draw_button(text: str, font: pygame.font.Font, x: int, y: int, width: int, h
     return False
 
 
-def game_over_screen(score: Score) -> bool:
+def ask_username_screen(player: Player):
+
+    score_label = "Score: " + str(player.points)
+    score_x = WIDTH // 3 - font.size(str(player.points))[1] // 2
+    #score_y = text_y + 175 # Position below "FOOO" text
+    score_y = HEIGHT // 2 - font.size(score_label)[1] // 2 - 150
+    draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
+
+    congratulations_text = "Wow, you are in the top 5 of the biggest mules!"
+    text_x = 25
+    text_y = score_y + 175
+    draw_text_with_outline(congratulations_text, leaderboard_font, WHITE, BLACK, text_x, text_y)
+
+
+    username_label = "Enter a username to get on the leaderboard."
+    username_x = 25
+    username_y = text_y + 40 # Position below the former text
+    draw_text_with_outline(username_label, leaderboard_font, WHITE, BLACK, username_x, username_y)
+
+
+    # Draw "Yes" button
+    yes_x = WIDTH // 2 - 125
+    yes_y = username_y + 50
+    yes_width = 100
+    yes_height = 70
+
+
+    base_font = pygame.font.Font(None, 32)
+    user_text = ''
+
+    # Create input rectangle
+    input_box_y = username_y + 50
+    input_rect = pygame.Rect(WIDTH // 2 - 175, input_box_y, 200, 50)
+
+    # Draw "No" button
+    no_button_x = WIDTH // 2 - 115
+    no_button_y = input_box_y + 75
+    no_button_width = 200
+    no_button_height = 50
+
+    color_active = pygame.Color(((200,200,200))) #light gray
+    color_passive = pygame.Color('black')
+    color = color_passive
+
+    active = False
+
+
+    while True:
+        #yes_button = draw_button("Yes", button_font, yes_x, yes_y, yes_width, yes_height, BLACK, LIGHT_GRAY)
+        no_button = draw_button("No thanks", button_font, no_button_x, no_button_y, no_button_width, no_button_height, BLACK, LIGHT_GRAY)
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if no_button:
+                main_menu()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if input_rect.collidepoint(event.pos):
+                    active = True
+                else:
+                    active = False
+
+            if event.type == pygame.KEYDOWN:
+                if active:
+                    if event.key == pygame.K_RETURN:
+                        ctypes.windll.user32.MessageBoxW(0, "Score saved!", "Popup", 0)
+                        player.update_name(user_text)
+                        save_score(client, player.points, player.name)  # Save the score to the database
+                        user_text = ''
+                        main_menu()
+                    if event.key == pygame.K_BACKSPACE:
+                        user_text = user_text[:-1]
+                    else:
+                        user_text += event.unicode
+
+        if active:
+            color = color_active
+        else:
+            color = color_passive
+
+        pygame.draw.rect(screen, color, input_rect)
+
+        if user_text == '':
+            text_surface = base_font.render("The name of the awesome mule", True, (180, 180, 180))  # Lighter color for placeholder
+        else:
+            text_surface = base_font.render(user_text, True, (255, 255, 255))  # White color for user input
+        screen.blit(text_surface, (input_rect.x + 5, input_rect.y + 5))
+
+        input_rect.w = max(200, text_surface.get_width() + 10)
+
+
+def game_over_screen(player: Player) -> bool:
     """
     Displays the game over screen with the final score and a "Play Again" button.
 
@@ -294,7 +402,6 @@ def game_over_screen(score: Score) -> bool:
     bool
         True if the player wants to play again, otherwise False.
     """
-    save_score(client, score.points)  # Save the score to the database
     high_scores = get_high_scores(client)  # Retrieve the top scores
 
     game_over_text = "FOOO"
@@ -303,8 +410,8 @@ def game_over_screen(score: Score) -> bool:
     draw_text_with_outline(game_over_text, font, WHITE, BLACK, text_x, text_y)
 
     # Render the score below the "FOOO" text
-    score_label = "Score: " + str(score.points)
-    score_x = WIDTH // 3 - font.size(str(score.points))[1] // 2 + 25
+    score_label = "Score: " + str(player.points)
+    score_x = WIDTH // 3 - font.size(str(player.points))[1] // 2 + 25
     score_y = text_y + 175 # Position below "FOOO" text
     draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
 
@@ -345,6 +452,7 @@ def game_over_screen(score: Score) -> bool:
                 run_game()
             if main_menu_button:
                 main_menu()
+
 
 def display_leaderboard():
     leaderboard_font = pygame.font.Font(font_path, 36)
@@ -396,18 +504,7 @@ def main_menu():
     button_y = HEIGHT // 2 - 35
     button_width = 200
     button_height = 70
-    base_font = pygame.font.Font(None, 32)
-    user_text = ''
-
-    # Create input rectangle
-    input_rect = pygame.Rect(10, 10, 200, 50)
-
-    color_active = pygame.Color('lightskyblue3')
-    color_passive = pygame.Color('chartreuse4')
-    color = color_passive
-
-    active = False
-
+    
     while True:
         screen.blit(bg, (0, 0))
 
@@ -431,34 +528,6 @@ def main_menu():
             if leaderboard:
                 display_leaderboard()
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if input_rect.collidepoint(event.pos):
-                    active = True
-                else:
-                    active = False
-
-            if event.type == pygame.KEYDOWN:
-                if active:
-                    if event.key == pygame.K_BACKSPACE:
-                        user_text = user_text[:-1]
-                    else:
-                        user_text += event.unicode
-
-        if active:
-            color = color_active
-        else:
-            color = color_passive
-
-        pygame.draw.rect(screen, color, input_rect)
-
-        if user_text == '':
-            text_surface = base_font.render("Enter a username", True, (180, 180, 180))  # Lighter color for placeholder
-        else:
-            text_surface = base_font.render(user_text, True, (255, 255, 255))  # White color for user input
-        screen.blit(text_surface, (input_rect.x + 5, input_rect.y + 5))
-
-        input_rect.w = max(200, text_surface.get_width() + 10)
-
         pygame.display.flip()
 
 def run_game() -> bool:
@@ -476,7 +545,7 @@ def run_game() -> bool:
     pipes.empty()
 
     mule = Mule()
-    score = Score()
+    player = Player()
     all_sprites.add(mule)
 
     running = True
@@ -501,7 +570,7 @@ def run_game() -> bool:
         if current_time - last_pipe_time > PIPE_INTERVAL:
             create_pipe()
             last_pipe_time = current_time
-            score.update_score()
+            player.update_score()
 
         pipe_collision = pygame.sprite.spritecollide(mule, pipes, False)
         if pipe_collision:
@@ -509,12 +578,17 @@ def run_game() -> bool:
             running = False
 
         all_sprites.draw(screen)
-        if running and score.points >= 0:
-            score.render_score(WIDTH // 2, HEIGHT // 7)
+        if running and player.points >= 0:
+            player.render_score(WIDTH // 2, HEIGHT // 7)
         pygame.display.flip()
         clock.tick(60)
 
-    return game_over_screen(score)
+
+    if player.points > get_worst_score_in_db(client)[0] or get_worst_score_in_db(client)[1] < 5: #check if there are under 5 entries in db or the user is better than the worst score in db
+        return ask_username_screen(player)
+    if get_worst_score_in_db(client)[0] >= player.points:
+        return game_over_screen(player)
+
 
 if __name__ == "__main__":
     main_menu()
