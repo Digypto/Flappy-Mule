@@ -462,7 +462,8 @@ def display_leaderboard():
     title_font = pygame.font.Font(font_path, 72)
     back_button_font = pygame.font.Font(font_path, 36)
 
-    high_scores = get_high_scores(client)
+    high_scores_cursor = get_high_scores(client)
+    high_scores = list(high_scores_cursor)
 
     running = True
     while running:
@@ -471,15 +472,16 @@ def display_leaderboard():
         # Draw title
         leaderboard_title = "Leaderboard"
         title_x = WIDTH // 2 - title_font.size(leaderboard_title)[0] // 2
-        title_y = HEIGHT // 8
+        title_y = HEIGHT // 20
         draw_text_with_outline(leaderboard_title, title_font, WHITE, BLACK, title_x, title_y)
 
         # Draw scores
         for i, score_doc in enumerate(high_scores):
             score_value = score_doc.get('score')  # Accessing the 'score' field from the document
-            score_text = f"{i + 1}. {score_value}"
+            user_name = score_doc.get('user')
+            score_text = f"{i + 1}. {user_name}: {score_value}"
             text_x = WIDTH // 2 - leaderboard_font.size(score_text)[0] // 2
-            text_y = title_y + (i + 1) * 50
+            text_y = title_y + (i + 2) * 50
             draw_text_with_outline(score_text, leaderboard_font, WHITE, BLACK, text_x, text_y)
         
         # Draw "Back" button
