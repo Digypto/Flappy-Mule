@@ -4,7 +4,8 @@ import random
 import os
 from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
 from db.db_connection import get_db_connection, retrieve_db_credentials
-from pymsgbox import *
+import ctypes
+import subprocess
 
 
 # Initialize pygame
@@ -315,12 +316,6 @@ def ask_username_screen(player: Player):
     draw_text_with_outline(username_label, leaderboard_font, WHITE, BLACK, username_x, username_y)
 
 
-    # Draw "Yes" button
-    yes_x = WIDTH // 2 - 125
-    yes_y = username_y + 50
-    yes_width = 100
-    yes_height = 70
-
 
     base_font = pygame.font.Font(None, 32)
     user_text = ''
@@ -362,7 +357,15 @@ def ask_username_screen(player: Player):
             if event.type == pygame.KEYDOWN:
                 if active:
                     if event.key == pygame.K_RETURN:
-                        alert(text='Score saved!', title='Popup', button='OK')
+                        try:
+                            ctypes.windll.user32.MessageBoxA(0, "Score saved!", "Popup", 0)
+                        except AttributeError:
+                            applescript = """
+                                display dialog "Score saved!" ¬
+                                with title "Popup" ¬
+                                buttons {"OK"}
+                                """
+                            subprocess.call("osascript -e '{}'".format(applescript), shell=True)
                         player.update_name(user_text)
                         save_score(client, player.points, player.name)  # Save the score to the database
                         user_text = ''
