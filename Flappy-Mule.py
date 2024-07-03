@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 import random
 import os
-from db.db_operations import save_score, get_high_scores
+from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
 from db.db_connection import get_db_connection, retrieve_db_credentials
 
 
@@ -37,6 +37,7 @@ font_path = f'{os.getcwd()}/assets/BebasNeue-Regular.ttf'
 font = pygame.font.Font(font_path, 160)
 button_font = pygame.font.Font(font_path, 48)  # Smaller font for the button
 score_font = pygame.font.Font(font_path, 120)  # Font for the score
+leaderboard_font = pygame.font.Font(font_path, 28)
 
 class Mule(pygame.sprite.Sprite):
     """
@@ -280,6 +281,53 @@ def draw_button(text: str, font: pygame.font.Font, x: int, y: int, width: int, h
     return False
 
 
+def ask_username_screen(score: Score):
+    save_score(client, score.points)  # Save the score to the database
+
+    score_label = "Score: " + str(score.points)
+    score_x = WIDTH // 3 - font.size(str(score.points))[1] // 2
+    #score_y = text_y + 175 # Position below "FOOO" text
+    score_y = HEIGHT // 2 - font.size(score_label)[1] // 2 - 150
+    draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
+
+    congratulations_text = "Wow, you are in the top 5 of the biggest mules!"
+    text_x = 25
+    text_y = score_y + 175
+    draw_text_with_outline(congratulations_text, leaderboard_font, WHITE, BLACK, text_x, text_y)
+
+
+    username_label = "Enter a username to get on the leaderboard."
+    username_x = 25
+    username_y = text_y + 40 # Position below the former text
+    draw_text_with_outline(username_label, leaderboard_font, WHITE, BLACK, username_x, username_y)
+
+
+    # Draw "Yes" button
+    yes_x = WIDTH // 2 - 125
+    yes_y = username_y + 50
+    yes_width = 100
+    yes_height = 70
+
+    # Draw "No" button
+    no_button_x = WIDTH // 2
+    no_button_y = yes_y
+    no_button_width = 100
+    no_button_height = 70
+
+
+    while True:
+        yes_button = draw_button("Yes", button_font, yes_x, yes_y, yes_width, yes_height, BLACK, LIGHT_GRAY)
+        no_button = draw_button("No", button_font, no_button_x, no_button_y, no_button_width, no_button_height, BLACK, LIGHT_GRAY)
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if no_button:
+                main_menu()
+
+
 def game_over_screen(score: Score) -> bool:
     """
     Displays the game over screen with the final score and a "Play Again" button.
@@ -514,7 +562,13 @@ def run_game() -> bool:
         pygame.display.flip()
         clock.tick(60)
 
-    return game_over_screen(score)
+    score.points = get_worst_score_in_db(client)[0] + 1
+
+    if score.points > get_worst_score_in_db(client)[0] or get_worst_score_in_db(client)[1] < 5: #check if there are under 5 entries in db or the user is better than the worst score in db
+        return ask_username_screen(score)
+    if get_worst_score_in_db(client)[0] >= score.points:
+        return game_over_screen(score)
+
 
 if __name__ == "__main__":
     main_menu()

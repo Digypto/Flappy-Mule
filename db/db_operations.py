@@ -59,6 +59,18 @@ def get_high_scores(client: MongoClient) -> list:
     except Exception as e:
         print(f"Error retrieving high scores: {e}")
 
+def get_worst_score_in_db(client: MongoClient):
+        db = client["FlappyMule"]
+        highscores_col = db['FlappyMuleScores']
+        sorted_scores = highscores_col.find().sort('score', pymongo.DESCENDING).limit(5)
+        worst_val = 0
+        num_of_docs = 0
+        for score_doc in sorted_scores:
+            score_value = score_doc.get('score')
+            worst_val = score_value
+            num_of_docs += 1
+        return worst_val, num_of_docs
+
 def check_and_create_collection(client: MongoClient):
         mydb = client["FlappyMule"]
         if "FlappyMuleScores" not in mydb.list_collection_names():
