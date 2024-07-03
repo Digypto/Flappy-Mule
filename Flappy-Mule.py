@@ -358,7 +358,7 @@ def ask_username_screen(player: Player):
                 if active:
                     if event.key == pygame.K_RETURN:
                         try:
-                            ctypes.windll.user32.MessageBoxA(0, "Score saved!", "Popup", 0)
+                            ctypes.windll.user32.MessageBoxW(0, "Score saved!", "Popup", 0)
                         except AttributeError:
                             applescript = """
                                 display dialog "Score saved!" ¬
