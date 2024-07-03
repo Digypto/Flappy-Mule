@@ -10,7 +10,7 @@ password = credential_dict.get("password")
 host = credential_dict.get("host")
 port = credential_dict.get("port")
 
-def save_score(client: MongoClient, score: int) -> None:
+def save_score(client: MongoClient, score: int, name: str) -> None:
     """
     Saves the score to the 'highscores' collection in MongoDB.
 
@@ -26,10 +26,10 @@ def save_score(client: MongoClient, score: int) -> None:
         num_documents = highscores_col.count_documents({})
         lowest_score_doc = highscores_col.find().sort('score', pymongo.ASCENDING).limit(1)
         if num_documents < 5:
-            data = {"user": "test_mule", "score": score}
+            data = {"user": name, "score": score}
             highscores_col.insert_one(data)
         if score > lowest_score_doc[0]['score'] and num_documents >= 5:
-            data = {"user": "test_mule", "score": score}
+            data = {"user": name, "score": score}
             highscores_col.insert_one(data)
             highscores_col.delete_one({"_id": lowest_score_doc[0]['_id']}) #Deleting the worst entry
     except Exception as e:

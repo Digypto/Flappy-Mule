@@ -112,14 +112,16 @@ class Pipe(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
-class Score(pygame.sprite.Sprite):
+class Player(pygame.sprite.Sprite):
     """
-    Represents the score in the game.
+    Represents the user in the game.
 
     Attributes
     ----------
     points : int
         The current score.
+    name : str
+        The name of the user (if asked)
     font : pygame.font.Font
         The font used to render the score.
     color : tuple[int, int, int]
@@ -130,6 +132,7 @@ class Score(pygame.sprite.Sprite):
     def __init__(self) -> None:
         super().__init__()
         self.points = -1
+        self.name = ""
         self.font = pygame.font.Font('assets/BebasNeue-Regular.ttf', 48)
         self.color = (255, 255, 255)  # White rgb
         self.outline_color = BLACK
@@ -139,6 +142,12 @@ class Score(pygame.sprite.Sprite):
         Increases the score by 1 point.
         """
         self.points += 1
+
+    def update_name(self, name) -> None:
+        """
+        Adds a name to the user.
+        """
+        self.name = name
 
     def render_score(self, x: int, y: int) -> None:
         """
@@ -282,12 +291,12 @@ def draw_button(text: str, font: pygame.font.Font, x: int, y: int, width: int, h
     return False
 
 
-def ask_username_screen(score: Score):
+def ask_username_screen(player: Player):
 
-    save_score(client, score.points)  # Save the score to the database
+    save_score(client, player.points, player.name)  # Save the score to the database
 
-    score_label = "Score: " + str(score.points)
-    score_x = WIDTH // 3 - font.size(str(score.points))[1] // 2
+    score_label = "Score: " + str(player.points)
+    score_x = WIDTH // 3 - font.size(str(player.points))[1] // 2
     #score_y = text_y + 175 # Position below "FOOO" text
     score_y = HEIGHT // 2 - font.size(score_label)[1] // 2 - 150
     draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
@@ -352,6 +361,7 @@ def ask_username_screen(score: Score):
                 if active:
                     if event.key == pygame.K_RETURN:
                         ctypes.windll.user32.MessageBoxW(0, "Score saved!", "Popup", 0)
+                        Player().update_name(user_text)
                         user_text = ''
                         main_menu()
                     if event.key == pygame.K_BACKSPACE:
@@ -375,7 +385,7 @@ def ask_username_screen(score: Score):
         input_rect.w = max(200, text_surface.get_width() + 10)
 
 
-def game_over_screen(score: Score) -> bool:
+def game_over_screen(player: Player) -> bool:
     """
     Displays the game over screen with the final score and a "Play Again" button.
 
@@ -389,7 +399,7 @@ def game_over_screen(score: Score) -> bool:
     bool
         True if the player wants to play again, otherwise False.
     """
-    save_score(client, score.points)  # Save the score to the database
+    save_score(client, player.points, player.name)  # Save the score to the database
     high_scores = get_high_scores(client)  # Retrieve the top scores
 
     game_over_text = "FOOO"
@@ -398,8 +408,8 @@ def game_over_screen(score: Score) -> bool:
     draw_text_with_outline(game_over_text, font, WHITE, BLACK, text_x, text_y)
 
     # Render the score below the "FOOO" text
-    score_label = "Score: " + str(score.points)
-    score_x = WIDTH // 3 - font.size(str(score.points))[1] // 2 + 25
+    score_label = "Score: " + str(player.points)
+    score_x = WIDTH // 3 - font.size(str(player.points))[1] // 2 + 25
     score_y = text_y + 175 # Position below "FOOO" text
     draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
 
@@ -533,7 +543,7 @@ def run_game() -> bool:
     pipes.empty()
 
     mule = Mule()
-    score = Score()
+    player = Player()
     all_sprites.add(mule)
 
     running = True
@@ -558,7 +568,7 @@ def run_game() -> bool:
         if current_time - last_pipe_time > PIPE_INTERVAL:
             create_pipe()
             last_pipe_time = current_time
-            score.update_score()
+            player.update_score()
 
         pipe_collision = pygame.sprite.spritecollide(mule, pipes, False)
         if pipe_collision:
@@ -566,17 +576,17 @@ def run_game() -> bool:
             running = False
 
         all_sprites.draw(screen)
-        if running and score.points >= 0:
-            score.render_score(WIDTH // 2, HEIGHT // 7)
+        if running and player.points >= 0:
+            player.render_score(WIDTH // 2, HEIGHT // 7)
         pygame.display.flip()
         clock.tick(60)
 
-    score.points = get_worst_score_in_db(client)[0] + 1
+    player.points = get_worst_score_in_db(client)[0] + 1
 
-    if score.points > get_worst_score_in_db(client)[0] or get_worst_score_in_db(client)[1] < 5: #check if there are under 5 entries in db or the user is better than the worst score in db
-        return ask_username_screen(score)
-    if get_worst_score_in_db(client)[0] >= score.points:
-        return game_over_screen(score)
+    if player.points > get_worst_score_in_db(client)[0] or get_worst_score_in_db(client)[1] < 5: #check if there are under 5 entries in db or the user is better than the worst score in db
+        return ask_username_screen(player)
+    if get_worst_score_in_db(client)[0] >= player.points:
+        return game_over_screen(player)
 
 
 if __name__ == "__main__":
