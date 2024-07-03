@@ -1,3 +1,2 @@
 pygame==2.6.0
 pymongo==4.8.0
-PyMsgBox==1.0.9
