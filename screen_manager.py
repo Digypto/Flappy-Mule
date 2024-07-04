@@ -38,6 +38,7 @@ class ScreenManager:
     def load_fonts(self):
         self.base_font = pygame.font.Font(self.font_path, 32)
         self.leaderboard_font = pygame.font.Font(self.font_path, 36)
+        self.congratulations_font = pygame.font.Font(self.font_path, 28)
         self.title_font = pygame.font.Font(self.font_path, 90)
         self.game_over_font = pygame.font.Font(self.font_path, 160)
         self.button_font = pygame.font.Font(self.font_path, 48)
@@ -52,12 +53,12 @@ class ScreenManager:
         congratulations_text = "Wow, you are in the top 5 of the biggest mules!"
         text_x = 25
         text_y = score_y + 175
-        draw_text_with_outline(self.screen, congratulations_text, self.leaderboard_font, text_x, text_y)
+        draw_text_with_outline(self.screen, congratulations_text, self.congratulations_font, text_x, text_y)
 
         username_label = "Enter a username to get on the leaderboard."
         username_x = 25
         username_y = text_y + 40
-        draw_text_with_outline(self.screen, username_label, self.leaderboard_font, username_x, username_y)
+        draw_text_with_outline(self.screen, username_label, self.congratulations_font, username_x, username_y)
 
         input_box_y = username_y + 50
         input_rect = pygame.Rect(WIDTH // 2 - 175, input_box_y, 200, 50)
