@@ -489,7 +489,7 @@ def display_leaderboard():
             score_value = score_doc.get('score')  # Accessing the 'score' field from the document
             user_name = score_doc.get('user')
             score_text = f"{i + 1}. {user_name}: {score_value}"
-            text_x = WIDTH // 2 - leaderboard_font.size(score_text)[0] // 2
+            text_x = WIDTH // 2 // 2
             text_y = title_y + (i + 2) * 50
             draw_text_with_outline(score_text, leaderboard_font, WHITE, BLACK, text_x, text_y)
         
