@@ -7,6 +7,8 @@ from db.db_connection import get_db_connection, retrieve_db_credentials
 import ctypes
 import subprocess
 
+from player import Player
+
 
 # Initialize pygame
 credential_dict = retrieve_db_credentials()
@@ -113,60 +115,7 @@ class Pipe(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
-class Player(pygame.sprite.Sprite):
-    """
-    Represents the user in the game.
 
-    Attributes
-    ----------
-    points : int
-        The current score.
-    name : str
-        The name of the user (if asked)
-    font : pygame.font.Font
-        The font used to render the score.
-    color : tuple[int, int, int]
-        The color of the score text.
-    outline_color : tuple[int, int, int]
-        The color of the score text outline.
-    """
-    def __init__(self) -> None:
-        super().__init__()
-        self.points = -1
-        self.name = ""
-        self.font = pygame.font.Font('assets/BebasNeue-Regular.ttf', 48)
-        self.color = (255, 255, 255)  # White rgb
-        self.outline_color = BLACK
-
-    def update_score(self) -> None:
-        """
-        Increases the score by 1 point.
-        """
-        self.points += 1
-
-    def update_name(self, name) -> None:
-        """
-        Adds a name to the user.
-        """
-        self.name = name
-
-    def get_name(self) -> str:
-
-        return self.name
-
-    def render_score(self, x: int, y: int) -> None:
-        """
-        Renders the score on the screen.
-
-        Parameters
-        ----------
-        x : int
-            The x-coordinate where the score will be rendered.
-        y : int
-            The y-coordinate where the score will be rendered.
-        """
-        score_text = str(self.points)
-        draw_text_with_outline(score_text, self.font, self.color, self.outline_color, WIDTH // 2, HEIGHT // 7)
 
 # Global sprite groups
 all_sprites = pygame.sprite.Group()
@@ -309,7 +258,6 @@ def ask_username_screen(player: Player):
 
     score_label = "Score: " + str(player.points)
     score_x = WIDTH // 3 - font.size(str(player.points))[1] // 2
-    #score_y = text_y + 175 # Position below "FOOO" text
     score_y = HEIGHT // 2 - font.size(score_label)[1] // 2 - 150
     draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
 
@@ -414,7 +362,6 @@ def game_over_screen(player: Player) -> bool:
     bool
         True if the player wants to play again, otherwise False.
     """
-    high_scores = get_high_scores(client)  # Retrieve the top scores
 
     game_over_text = "FOOO"
     text_x = WIDTH // 2 - font.size(game_over_text)[0] // 2
@@ -428,9 +375,6 @@ def game_over_screen(player: Player) -> bool:
     draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
 
     death_time = pygame.time.get_ticks() # record the time when the mule dies
-
-    for score_doc in high_scores:
-        score_value = score_doc.get('score')  # Accessing the 'score' field from the document
 
 
     # Draw "Play Again" button
@@ -659,7 +603,7 @@ def run_game() -> bool:
 
         all_sprites.draw(screen)
         if running and player.points >= 0:
-            player.render_score(WIDTH // 2, HEIGHT // 7)
+            draw_text_with_outline(str(player.points), pygame.font.Font(font_path, 48), (255,255,255), (0,0,0), WIDTH // 2, HEIGHT // 7)
         pygame.display.flip()
         clock.tick(60)
 
