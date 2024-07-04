@@ -2,10 +2,13 @@ import pygame
 from pygame.locals import *
 import random
 import os
-from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
-from db.db_connection import get_db_connection, retrieve_db_credentials
 import ctypes
 import subprocess
+
+from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
+from db.db_connection import get_db_connection, retrieve_db_credentials
+from utils import play_coin_collision_sound, play_collision_sound
+
 
 from player import Player
 from mule import Mule
@@ -104,24 +107,6 @@ def create_pipe() -> None:
     all_sprites.add(top_pipe, bottom_pipe)
     pipes.add(top_pipe, bottom_pipe)
 
-
-def play_collision_sound() -> None:
-    """
-    Plays a sound effect when a collision occurs.
-    """
-    mule_sound = f'{os.getcwd()}/assets/mule.mp3'
-    pygame.mixer.init()
-    pygame.mixer.music.load(mule_sound)
-    pygame.mixer.music.play()
-
-def play_coin_collision_sound() -> None:
-    """
-    Plays a sound effect when user touches a coin.
-    """
-    omnom_sound = f'{os.getcwd()}/assets/omnom.mp3'
-    pygame.mixer.init()
-    pygame.mixer.music.load(omnom_sound)
-    pygame.mixer.music.play()
 
 def draw_text_with_outline(text: str, font: pygame.font.Font, text_color: tuple[int, int, int], outline_color: tuple[int, int, int], x: int, y: int) -> None:
     """
