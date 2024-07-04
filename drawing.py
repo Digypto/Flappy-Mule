@@ -7,12 +7,8 @@ BLACK = (0, 0, 0)
 GRAY = (128, 128, 128)
 LIGHT_GRAY = (200, 200, 200)
 
-WIDTH = 480
-HEIGHT = 500
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-
-def draw_text_with_outline(text: str, font: pygame.font.Font, x: int, y: int) -> None:
+def draw_text_with_outline(screen: pygame.surface.Surface, text: str, font: pygame.font.Font, x: int, y: int) -> None:
     """
     Draws text with an outline on the screen.
 
@@ -41,7 +37,7 @@ def draw_text_with_outline(text: str, font: pygame.font.Font, x: int, y: int) ->
     main_text = font.render(text, True, WHITE)
     screen.blit(main_text, (x, y))
 
-def draw_button(text: str, font: pygame.font.Font, x: int, y: int, width: int, height: int, inactive_color: tuple[int, int, int], active_color: tuple[int, int, int]) -> bool:
+def draw_button(screen: pygame.surface.Surface, text: str, font: pygame.font.Font, x: int, y: int, width: int, height: int, inactive_color: tuple[int, int, int], active_color: tuple[int, int, int]) -> bool:
     """
     Draws a button on the screen and returns whether it is clicked.
 
