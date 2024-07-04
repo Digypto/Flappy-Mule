@@ -11,6 +11,7 @@ from utils import play_coin_collision_sound, play_collision_sound
 
 from player import Player
 from game_objects import Mule, all_sprites, pipes, coins, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe
+from drawing import draw_button, draw_text_with_outline
 
 # Initialize pygame
 credential_dict = retrieve_db_credentials()
@@ -46,76 +47,6 @@ score_font = pygame.font.Font(font_path, 120)  # Font for the score
 leaderboard_font = pygame.font.Font(font_path, 28)
 
 
-def draw_text_with_outline(text: str, font: pygame.font.Font, text_color: tuple[int, int, int], outline_color: tuple[int, int, int], x: int, y: int) -> None:
-    """
-    Draws text with an outline on the screen.
-
-    Parameters
-    ----------
-    text : str
-        The text to be rendered.
-    font : pygame.font.Font
-        The font used to render the text.
-    text_color : Tuple[int, int, int]
-        The color of the text.
-    outline_color : Tuple[int, int, int]
-        The color of the text outline.
-    x : int
-        The x-coordinate where the text will be rendered.
-    y : int
-        The y-coordinate where the text will be rendered.
-    """
-    # Render the text with the outline color multiple times
-    outline_positions = [(x-2, y-2), (x+2, y-2), (x-2, y+2), (x+2, y+2), (x-2, y), (x+2, y), (x, y-2), (x, y+2)]
-    for pos in outline_positions:
-        outline_text = font.render(text, True, BLACK)
-        screen.blit(outline_text, pos)
-
-    # Render the text with the main color
-    main_text = font.render(text, True, WHITE)
-    screen.blit(main_text, (x, y))
-
-def draw_button(text: str, font: pygame.font.Font, x: int, y: int, width: int, height: int, inactive_color: tuple[int, int, int], active_color: tuple[int, int, int]) -> bool:
-    """
-    Draws a button on the screen and returns whether it is clicked.
-
-    Parameters
-    ----------
-    text : str
-        The text to be displayed on the button.
-    font : pygame.font.Font
-        The font used to render the button text.
-    x : int
-        The x-coordinate of the button's top-left corner.
-    y : int
-        The y-coordinate of the button's top-left corner.
-    width : int
-        The width of the button.
-    height : int
-        The height of the button.
-    inactive_color : Tuple[int, int, int]
-        The color of the button when it is not hovered over.
-    active_color : Tuple[int, int, int]
-        The color of the button when it is hovered over.
-
-    Returns
-    -------
-    bool
-        True if the button is clicked, otherwise False.
-    """
-    mouse = pygame.mouse.get_pos()
-    click = pygame.mouse.get_pressed()
-
-    if x < mouse[0] < x + width and y < mouse[1] < y + height:
-        pygame.draw.rect(screen, active_color, (x, y, width, height))
-        if click[0] == 1:
-            return True
-    else:
-        pygame.draw.rect(screen, inactive_color, (x, y, width, height))
-
-    button_text = font.render(text, True, WHITE)
-    screen.blit(button_text, (x + (width - button_text.get_width()) // 2, y + (height - button_text.get_height()) // 2))
-    return False
 
 
 def ask_username_screen(player: Player):
@@ -123,18 +54,18 @@ def ask_username_screen(player: Player):
     score_label = "Score: " + str(player.points)
     score_x = WIDTH // 3 - font.size(str(player.points))[1] // 2
     score_y = HEIGHT // 2 - font.size(score_label)[1] // 2 - 150
-    draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
+    draw_text_with_outline(score_label, score_font, score_x, score_y)
 
     congratulations_text = "Wow, you are in the top 5 of the biggest mules!"
     text_x = 25
     text_y = score_y + 175
-    draw_text_with_outline(congratulations_text, leaderboard_font, WHITE, BLACK, text_x, text_y)
+    draw_text_with_outline(congratulations_text, leaderboard_font, text_x, text_y)
 
 
     username_label = "Enter a username to get on the leaderboard."
     username_x = 25
     username_y = text_y + 40 # Position below the former text
-    draw_text_with_outline(username_label, leaderboard_font, WHITE, BLACK, username_x, username_y)
+    draw_text_with_outline(username_label, leaderboard_font, username_x, username_y)
 
 
 
@@ -230,13 +161,13 @@ def game_over_screen(player: Player) -> bool:
     game_over_text = "FOOO"
     text_x = WIDTH // 2 - font.size(game_over_text)[0] // 2
     text_y = HEIGHT // 2 - font.size(game_over_text)[1] // 2 - 150
-    draw_text_with_outline(game_over_text, font, WHITE, BLACK, text_x, text_y)
+    draw_text_with_outline(game_over_text, font, text_x, text_y)
 
     # Render the score below the "FOOO" text
     score_label = "Score: " + str(player.points)
     score_x = WIDTH // 3 - font.size(str(player.points))[1] // 2 + 25
     score_y = text_y + 175 # Position below "FOOO" text
-    draw_text_with_outline(score_label, score_font, WHITE, BLACK, score_x, score_y)
+    draw_text_with_outline(score_label, score_font, score_x, score_y)
 
     death_time = pygame.time.get_ticks() # record the time when the mule dies
 
@@ -290,7 +221,7 @@ def display_leaderboard():
         leaderboard_title = "Leaderboard"
         title_x = WIDTH // 2 - title_font.size(leaderboard_title)[0] // 2
         title_y = HEIGHT // 20
-        draw_text_with_outline(leaderboard_title, title_font, WHITE, BLACK, title_x, title_y)
+        draw_text_with_outline(leaderboard_title, title_font, title_x, title_y)
 
         # Draw scores
         for i, score_doc in enumerate(high_scores):
@@ -299,7 +230,7 @@ def display_leaderboard():
             score_text = f"{i + 1}. {user_name}: {score_value}"
             text_x = WIDTH // 2 // 2
             text_y = title_y + (i + 2) * 50
-            draw_text_with_outline(score_text, leaderboard_font, WHITE, BLACK, text_x, text_y)
+            draw_text_with_outline(score_text, leaderboard_font, text_x, text_y)
         
         # Draw "Back" button
         back_button_x = WIDTH // 2 - 100
@@ -335,7 +266,7 @@ def main_menu():
         title_font = pygame.font.Font(font_path, 90)
         flappy_x = WIDTH // 2 - title_font.size(flappy_title)[0] // 2
         flappy_y = HEIGHT // 6
-        draw_text_with_outline(flappy_title, title_font, WHITE, BLACK, flappy_x, flappy_y)
+        draw_text_with_outline(flappy_title, title_font, flappy_x, flappy_y)
 
 
         play = draw_button("Play", button_font, button_x, button_y, button_width + 50, button_height, BLACK, LIGHT_GRAY)
@@ -409,7 +340,7 @@ def run_game() -> bool:
 
         all_sprites.draw(screen)
         if running and player.points >= 0:
-            draw_text_with_outline(str(player.points), pygame.font.Font(font_path, 48), (255,255,255), (0,0,0), WIDTH // 2, HEIGHT // 7)
+            draw_text_with_outline(str(player.points), pygame.font.Font(font_path, 48), WIDTH // 2, HEIGHT // 7)
         pygame.display.flip()
         clock.tick(60)
 
