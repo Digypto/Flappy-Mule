@@ -8,7 +8,7 @@ import os
 
 from db.db_operations import get_worst_score_in_db
 from db.db_connection import get_db_connection, retrieve_db_credentials
-from utils import play_coin_collision_sound, play_collision_sound
+from sound_manager import play_coin_collision_sound, play_collision_sound
 
 from player import Player
 from game_objects import Mule, all_sprites, pipes, coins, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe
@@ -37,7 +37,7 @@ class ScreenManager:
 
     def load_fonts(self):
         self.base_font = pygame.font.Font(self.font_path, 32)
-        self.leaderboard_font = pygame.font.Font(self.font_path, 28)
+        self.leaderboard_font = pygame.font.Font(self.font_path, 36)
         self.title_font = pygame.font.Font(self.font_path, 90)
         self.game_over_font = pygame.font.Font(self.font_path, 160)
         self.button_font = pygame.font.Font(self.font_path, 48)
