@@ -12,7 +12,7 @@ from utils import play_coin_collision_sound, play_collision_sound
 
 from player import Player
 from mule import Mule
-
+from game_objects import all_sprites, pipes, coins, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe
 
 # Initialize pygame
 credential_dict = retrieve_db_credentials()
@@ -46,66 +46,6 @@ font = pygame.font.Font(font_path, 160)
 button_font = pygame.font.Font(font_path, 48)  # Smaller font for the button
 score_font = pygame.font.Font(font_path, 120)  # Font for the score
 leaderboard_font = pygame.font.Font(font_path, 28)
-
-
-class Pipe(pygame.sprite.Sprite):
-    """
-    Represents a pipe obstacle in the game.
-
-    Attributes
-    ----------
-    image : pygame.Surface
-        The image of the pipe.
-    rect : pygame.Rect
-        The rectangle representing the pipe's position and size.
-    """
-    def __init__(self, position: str, height: int) -> None:
-        super().__init__()
-        self.image = pygame.image.load(f'{os.getcwd()}/assets/fence.png')
-        self.rect = self.image.get_rect()
-        if position == "top":
-            self.rect.bottom = height
-        else:
-            self.rect.top = HEIGHT - height
-        self.rect.x = WIDTH
-
-    def update(self) -> None:
-        """
-        Updates the pipe's position and removes it if it goes off-screen.
-        """
-        self.rect.x -= 5
-        if self.rect.right < 0:
-            self.kill()
-
-
-
-# Global sprite groups
-all_sprites = pygame.sprite.Group()
-pipes = pygame.sprite.Group()
-last_pipe_time = 0
-PIPE_INTERVAL = 1500
-
-def create_pipe() -> None:
-    """
-    Creates a pair of top and bottom pipes with a gap between them,
-    and adds them to the sprite groups.
-    """
-    global all_sprites, pipes, last_pipe_time
-
-    # Define the gap size between top and bottom pipes (adjust if the game is too easy or hard)
-    gap_size = 200
-
-    # Randomly determine the position of the gap
-    min_gap_position = 100
-    max_gap_position = HEIGHT - 100 - gap_size
-    gap_position = random.randint(min_gap_position, max_gap_position)
-
-    top_pipe = Pipe("top", gap_position)
-    bottom_pipe = Pipe("bottom", HEIGHT - gap_position - gap_size)
-
-    # Add the pipes to the sprite groups
-    all_sprites.add(top_pipe, bottom_pipe)
-    pipes.add(top_pipe, bottom_pipe)
 
 
 def draw_text_with_outline(text: str, font: pygame.font.Font, text_color: tuple[int, int, int], outline_color: tuple[int, int, int], x: int, y: int) -> None:
@@ -414,64 +354,6 @@ def main_menu():
 
         pygame.display.flip()
 
-# Load the coin image
-coin_image_path = f'{os.getcwd()}/assets/coin.png'
-coin_image = pygame.image.load(coin_image_path)
-coin_image = pygame.transform.scale(coin_image, (40, 40))  # Resize if needed
-coin_image.convert_alpha()
-
-class Coin(pygame.sprite.Sprite):
-    """
-    Represents a coin that the mule can collect in the game.
-
-    Attributes
-    ----------
-    image : pygame.Surface
-        The image of the coin.
-    rect : pygame.Rect
-        The rectangle representing the coin's position and size.
-    """
-    def __init__(self, x, y) -> None:
-        super().__init__()
-        self.image = coin_image
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-
-    def update(self) -> None:
-        """
-        Updates the coin's position and removes it if it goes off-screen.
-        """
-        self.rect.x -= 5
-        if self.rect.right < 0:
-            self.kill()
-
-# Global sprite groups
-all_sprites = pygame.sprite.Group()
-pipes = pygame.sprite.Group()
-coins = pygame.sprite.Group()
-last_pipe_time = 0
-PIPE_INTERVAL = 1500
-
-def create_coin() -> None:
-    
-    x = WIDTH + 20
-    valid_position = False
-    y = 0
-
-    while not valid_position:
-        y = random.randint(50, HEIGHT - 50)
-        valid_position = True
-
-        for pipe in pipes:
-            pipe_rect = pipe.rect.inflate(50, 50)  # Enlarge the pipe rect to avoid close positions
-            if pipe_rect.collidepoint(x, y):
-                valid_position = False
-                break
-
-    coin = Coin(x, y)
-    all_sprites.add(coin)
-    coins.add(coin)
 
 def run_game() -> bool:
     """
