@@ -1,6 +1,5 @@
 import pygame
 from pygame.locals import *
-import random
 import os
 import ctypes
 import subprocess
@@ -11,8 +10,7 @@ from utils import play_coin_collision_sound, play_collision_sound
 
 
 from player import Player
-from mule import Mule
-from game_objects import all_sprites, pipes, coins, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe
+from game_objects import Mule, all_sprites, pipes, coins, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe
 
 # Initialize pygame
 credential_dict = retrieve_db_credentials()
