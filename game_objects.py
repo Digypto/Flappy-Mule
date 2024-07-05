@@ -138,12 +138,12 @@ def create_coin() -> None:
     """
     global all_sprites, coins
 
-    x = WIDTH + 20
     valid_position = False
     y = 0
 
     while not valid_position:
-        y = random.randint(50, HEIGHT - 50)
+        y = random.randint(25, HEIGHT - 25)
+        x = random.randint(100, WIDTH)
         valid_position = True
 
         for pipe in pipes:
