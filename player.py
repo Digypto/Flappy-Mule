@@ -22,13 +22,14 @@ class Player(pygame.sprite.Sprite):
     def __init__(self) -> None:
         super().__init__()
         self.points = -1
+        self.point_multiplier = 1
         self.name = ""
 
     def update_score(self) -> None:
         """
         Increases the score by 1 point.
         """
-        self.points += 1
+        self.points += 1 * self.point_multiplier
 
     def update_name(self, name) -> None:
         """
@@ -43,3 +44,9 @@ class Player(pygame.sprite.Sprite):
     def get_score(self) -> int:
 
         return self.points
+    
+    def activate_double_points(self):
+        self.point_multiplier = 2
+
+    def deactivate_double_points(self):
+        self.point_multiplier = 1

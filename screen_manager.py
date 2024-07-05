@@ -11,7 +11,7 @@ from db.db_connection import get_db_connection, retrieve_db_credentials
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
 
 from player import Player
-from game_objects import Mule, all_sprites, pipes, coins, powerups, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe, create_powerup
+from game_objects import Mule, PowerUp, all_sprites, pipes, coins, powerups, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe, create_powerup
 from drawing import draw_text_with_outline
 
 credential_dict = retrieve_db_credentials()
@@ -242,6 +242,7 @@ class ScreenManager:
 
         mule = Mule()
         player = Player()
+        powerup = PowerUp(0,0)
         all_sprites.add(mule)
 
         running = True
@@ -266,10 +267,10 @@ class ScreenManager:
             if current_time - last_pipe_time > PIPE_INTERVAL:
                 create_pipe()
                 create_coin()
-                create_powerup()
                 last_pipe_time = current_time
                 player.update_score()
-
+            if current_time % 10000 < 15: #Create a power up every 10 seconds
+                create_powerup()
             pipe_collision = pygame.sprite.spritecollide(mule, pipes, False)
             if pipe_collision:
                 play_collision_sound()
@@ -278,12 +279,19 @@ class ScreenManager:
             coin_collision = pygame.sprite.spritecollide(mule, coins, True)  # Detect coin collision
             if coin_collision:
                 play_coin_collision_sound()
-                player.points += 1  # Increase score by 1 for each coin collected
+                player.update_score()
             
-            powerup_collision = pygame.sprite.spritecollide(mule, powerups, True)  # Detect coin collision
+            powerup_collision = pygame.sprite.spritecollide(mule, powerups, True)  # Detect powerup collision
             if powerup_collision:
                 play_powerup_collision_sound()
-                #player.points += 1  # Increase score by 1 for each coin collected
+                powerup.activate(current_time)
+                player.activate_double_points() 
+
+            if powerup and not powerup.is_active(current_time):
+                player.deactivate_double_points()
+                #powerup_start_time = current_time
+                #powerup_active = True
+
 
             all_sprites.draw(self.screen)
             if running and player.points >= 0:

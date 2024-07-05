@@ -104,15 +104,25 @@ class Coin(GameObject):
 
 class PowerUp(GameObject):
     """
-    Represents a coin that the mule can collect in the game.
+    Represents a powerup that the mule can collect in the game.
     """
     def __init__(self, x: int, y: int) -> None:
-        image = pygame.image.load(f'{os.getcwd()}/assets/double_points2.png')
+        image = pygame.image.load(f'{os.getcwd()}/assets/double_points.png')
         image = pygame.transform.scale(image, (250, 250))  # Resizing
         image.convert_alpha()
         image = crop_image(image)
         super().__init__(image, x, y)
+        self.start_time = None
+        self.active = False
 
+    def activate(self, current_time):
+        self.start_time = current_time
+        self.active = True
+
+    def is_active(self, current_time):
+        if self.active and current_time - self.start_time > POWERUP_DURATION:
+            self.active = False
+        return self.active
 
 
 # Global sprite groups
@@ -122,6 +132,7 @@ coins = pygame.sprite.Group()
 powerups = pygame.sprite.Group()
 last_pipe_time = 0
 PIPE_INTERVAL = 1500
+POWERUP_DURATION = 5000
 
 def create_pipe() -> None:
     """
