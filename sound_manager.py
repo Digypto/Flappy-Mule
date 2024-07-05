@@ -19,3 +19,12 @@ def play_coin_collision_sound() -> None:
     pygame.mixer.init()
     pygame.mixer.music.load(omnom_sound)
     pygame.mixer.music.play()
+
+def play_powerup_collision_sound() -> None:
+    """
+    Plays a sound effect when user touches a powerup.
+    """
+    powerup_sound = f'{os.getcwd()}/assets/powerup.mp3'
+    pygame.mixer.init()
+    pygame.mixer.music.load(powerup_sound)
+    pygame.mixer.music.play()

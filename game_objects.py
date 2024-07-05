@@ -7,11 +7,7 @@ from utils import crop_image
 WIDTH = 480
 HEIGHT = 500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-# Load the coin image
-coin_image_path = f'{os.getcwd()}/assets/coin.png'
-coin_image = pygame.image.load(coin_image_path)
-coin_image = pygame.transform.scale(coin_image, (40, 40))  # Resize if needed
-coin_image.convert_alpha()
+
 
 class GameObject(pygame.sprite.Sprite):
     """
@@ -24,12 +20,13 @@ class GameObject(pygame.sprite.Sprite):
     rect : pygame.Rect
         The rectangle representing the object's position and size.
     """
-    def __init__(self, image_path: str, x: int, y: int) -> None:
+    def __init__(self, image: pygame.image, x: int, y: int) -> None:
         super().__init__()
-        self.image = pygame.image.load(image_path)
+        self.image = image
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
 
     def update(self) -> None:
         """
@@ -89,7 +86,8 @@ class Pipe(GameObject):
     """
     def __init__(self, position: str, height: int) -> None:
         y = height if position == "top" else HEIGHT - height
-        super().__init__(f'{os.getcwd()}/assets/fence.png', WIDTH, y)
+        image = pygame.image.load(f'{os.getcwd()}/assets/fence.png')
+        super().__init__(image, WIDTH, y)
         if position == "top":
             self.rect.bottom = height
         else:
@@ -101,13 +99,27 @@ class Coin(GameObject):
     Represents a coin that the mule can collect in the game.
     """
     def __init__(self, x: int, y: int) -> None:
-        super().__init__(f'{os.getcwd()}/assets/coin.png', x, y)
+        image = pygame.image.load(f'{os.getcwd()}/assets/coin.png')
+        super().__init__(image, x, y)
+
+class PowerUp(GameObject):
+    """
+    Represents a coin that the mule can collect in the game.
+    """
+    def __init__(self, x: int, y: int) -> None:
+        image = pygame.image.load(f'{os.getcwd()}/assets/double_points2.png')
+        image = pygame.transform.scale(image, (250, 250))  # Resizing
+        image.convert_alpha()
+        image = crop_image(image)
+        super().__init__(image, x, y)
+
 
 
 # Global sprite groups
 all_sprites = pygame.sprite.Group()
 pipes = pygame.sprite.Group()
 coins = pygame.sprite.Group()
+powerups = pygame.sprite.Group()
 last_pipe_time = 0
 PIPE_INTERVAL = 1500
 
@@ -155,3 +167,28 @@ def create_coin() -> None:
     coin = Coin(x, y)
     all_sprites.add(coin)
     coins.add(coin)
+
+def create_powerup() -> None:
+    """
+    Creates a coin at a random position that does not collide with pipes,
+    and adds it to the sprite groups.
+    """
+    global all_sprites, powerups
+
+    valid_position = False
+    y = 0
+
+    while not valid_position:
+        y = random.randint(25, HEIGHT - 25)
+        x = random.randint(100, WIDTH)
+        valid_position = True
+
+        for pipe in pipes:
+            pipe_rect = pipe.rect.inflate(50, 50)
+            if pipe_rect.collidepoint(x, y):
+                valid_position = False
+                break
+
+    powerup = PowerUp(x, y)
+    all_sprites.add(powerup)
+    powerups.add(powerup)

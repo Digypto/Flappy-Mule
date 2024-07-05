@@ -8,10 +8,10 @@ import os
 
 from db.db_operations import get_worst_score_in_db
 from db.db_connection import get_db_connection, retrieve_db_credentials
-from sound_manager import play_coin_collision_sound, play_collision_sound
+from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
 
 from player import Player
-from game_objects import Mule, all_sprites, pipes, coins, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe
+from game_objects import Mule, all_sprites, pipes, coins, powerups, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe, create_powerup
 from drawing import draw_text_with_outline
 
 credential_dict = retrieve_db_credentials()
@@ -238,6 +238,7 @@ class ScreenManager:
         all_sprites.empty()  # Clear the sprite groups
         pipes.empty()
         coins.empty()
+        powerups.empty()
 
         mule = Mule()
         player = Player()
@@ -265,6 +266,7 @@ class ScreenManager:
             if current_time - last_pipe_time > PIPE_INTERVAL:
                 create_pipe()
                 create_coin()
+                create_powerup()
                 last_pipe_time = current_time
                 player.update_score()
 
@@ -277,6 +279,11 @@ class ScreenManager:
             if coin_collision:
                 play_coin_collision_sound()
                 player.points += 1  # Increase score by 1 for each coin collected
+            
+            powerup_collision = pygame.sprite.spritecollide(mule, powerups, True)  # Detect coin collision
+            if powerup_collision:
+                play_powerup_collision_sound()
+                #player.points += 1  # Increase score by 1 for each coin collected
 
             all_sprites.draw(self.screen)
             if running and player.points >= 0:
