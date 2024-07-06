@@ -107,13 +107,20 @@ class PowerUp(GameObject):
     Represents a powerup that the mule can collect in the game.
     """
     def __init__(self, x: int, y: int) -> None:
-        image = pygame.image.load(f'{os.getcwd()}/assets/double_points.png')
+        selected_powerup = self.select_random_powerup()
+        image = pygame.image.load(f'{os.getcwd()}/assets/{selected_powerup}.png')
         image = pygame.transform.scale(image, (250, 250))  # Resizing
         image.convert_alpha()
         image = crop_image(image)
         super().__init__(image, x, y)
         self.start_time = None
         self.active = False
+
+    def select_random_powerup(self) -> str:
+        powerups_dict = {1: "double_points", 2: "extra_life"}
+        select_random_powerup = random.randint(1,2)
+        selected_powerup = powerups_dict.get(select_random_powerup)
+        return selected_powerup
 
     def activate(self, current_time):
         self.start_time = current_time
