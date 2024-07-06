@@ -24,12 +24,19 @@ class Player(pygame.sprite.Sprite):
         self.points = -1
         self.point_multiplier = 1
         self.name = ""
+        self.lives = 0
 
     def update_score(self) -> None:
         """
-        Increases the score by 1 point.
+        Increases the score by 1 point multiplied by the multiplier.
         """
         self.points += 1 * self.point_multiplier
+
+    def add_life(self) -> None:
+        """
+        Add a life to the user if powerup is collected.
+        """
+        self.lives += 1
 
     def update_name(self, name) -> None:
         """

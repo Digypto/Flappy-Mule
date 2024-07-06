@@ -289,12 +289,11 @@ class ScreenManager:
 
             if powerup and not powerup.is_active(current_time):
                 player.deactivate_double_points()
-                #powerup_start_time = current_time
-                #powerup_active = True
 
 
             all_sprites.draw(self.screen)
-            if running and player.points >= 0:
+            if running and player.points >= 0 and player.lives >= 0:
+                draw_text_with_outline(self.screen, f'Lives: {str(player.lives)}', pygame.font.Font(self.font_path, 48), 10, 10)
                 draw_text_with_outline(self.screen, str(player.points), pygame.font.Font(self.font_path, 48), WIDTH // 2, HEIGHT // 7)
             pygame.display.flip()
             clock.tick(60)
