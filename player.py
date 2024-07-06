@@ -38,6 +38,12 @@ class Player(pygame.sprite.Sprite):
         """
         self.lives += 1
 
+    def remove_life(self) -> None:
+        """
+        Remove a life if a pipe is hit.
+        """
+        self.lives -= 1
+
     def update_name(self, name) -> None:
         """
         Adds a name to the user.

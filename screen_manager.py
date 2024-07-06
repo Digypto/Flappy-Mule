@@ -233,7 +233,7 @@ class ScreenManager:
         bool
             True if the player wants to play again, otherwise False.
         """
-        global all_sprites, pipes, coins, last_pipe_time
+        global all_sprites, pipes, coins, powerups, last_pipe_time
 
         all_sprites.empty()  # Clear the sprite groups
         pipes.empty()
@@ -242,10 +242,11 @@ class ScreenManager:
 
         mule = Mule()
         player = Player()
-        powerup = PowerUp(0,0)
         all_sprites.add(mule)
+        powerup = None
 
         running = True
+        collision_handled = False
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -272,9 +273,13 @@ class ScreenManager:
             if current_time % 10000 < 15: #Create a power up every 10 seconds
                 create_powerup()
             pipe_collision = pygame.sprite.spritecollide(mule, pipes, False)
-            if pipe_collision:
+            if pipe_collision and not collision_handled:
                 play_collision_sound()
-                running = False
+                if player.lives == 0:
+                    running = False
+                else:
+                    player.remove_life()
+                    collision_handled = True
             
             coin_collision = pygame.sprite.spritecollide(mule, coins, True)  # Detect coin collision
             if coin_collision:
@@ -284,12 +289,19 @@ class ScreenManager:
             powerup_collision = pygame.sprite.spritecollide(mule, powerups, True)  # Detect powerup collision
             if powerup_collision:
                 play_powerup_collision_sound()
-                powerup.activate(current_time)
-                player.activate_double_points() 
+                for powerup in powerup_collision:
+                    powerup_collected = powerup.get_selected_powerup()
+                if powerup_collected == 'double_points':
+                    powerup.activate(current_time)
+                    player.activate_double_points()
+                elif powerup_collected == 'extra_life':
+                    player.add_life() 
 
             if powerup and not powerup.is_active(current_time):
                 player.deactivate_double_points()
 
+            if not pipe_collision:
+                collision_handled = False
 
             all_sprites.draw(self.screen)
             if running and player.points >= 0 and player.lives >= 0:

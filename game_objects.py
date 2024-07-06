@@ -107,8 +107,8 @@ class PowerUp(GameObject):
     Represents a powerup that the mule can collect in the game.
     """
     def __init__(self, x: int, y: int) -> None:
-        selected_powerup = self.select_random_powerup()
-        image = pygame.image.load(f'{os.getcwd()}/assets/{selected_powerup}.png')
+        self.selected_powerup = self.select_random_powerup()
+        image = pygame.image.load(f'{os.getcwd()}/assets/{self.selected_powerup}.png')
         image = pygame.transform.scale(image, (250, 250))  # Resizing
         image.convert_alpha()
         image = crop_image(image)
@@ -121,6 +121,9 @@ class PowerUp(GameObject):
         select_random_powerup = random.randint(1,2)
         selected_powerup = powerups_dict.get(select_random_powerup)
         return selected_powerup
+    
+    def get_selected_powerup(self) -> str:
+        return self.selected_powerup
 
     def activate(self, current_time):
         self.start_time = current_time
@@ -188,7 +191,7 @@ def create_coin() -> None:
 
 def create_powerup() -> None:
     """
-    Creates a coin at a random position that does not collide with pipes,
+    Creates a powerup at a random position that does not collide with pipes,
     and adds it to the sprite groups.
     """
     global all_sprites, powerups
