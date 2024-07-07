@@ -212,6 +212,8 @@ class ScreenManager:
 
             play = draw_button(self.screen, "Play", self.button_font, button_x, button_y, button_width + 50, button_height, (0, 0, 0), (200, 200, 200))
             leaderboard = draw_button(self.screen, "Leaderboard", self.button_font, button_x, button_y + 100, button_width + 50, button_height, (0, 0, 0), (200, 200, 200))
+            sign_in = draw_button(self.screen, "Sign in", self.base_font, 5, 5, 100, 40, (0, 0, 0), (200, 200, 200))
+
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -221,6 +223,8 @@ class ScreenManager:
                     self.run_game()
                 if leaderboard:
                     self.display_leaderboard()
+                if sign_in:
+                    self.sign_in_screen()
 
             pygame.display.flip()
 
@@ -246,9 +250,29 @@ class ScreenManager:
                     pygame.quit()
                     exit()
                 if sign_in:
-                    pass
+                    self.sign_in_screen()
                 if guest:
                     self.main_menu()
+
+            pygame.display.flip()
+
+    def sign_in_screen(self):
+        back_button_x = WIDTH // 2 - 100
+        back_button_y = HEIGHT - 100
+        back_button_width = 200
+        back_button_height = 70
+
+        while True:
+            self.screen.blit(bg, (0, 0))
+
+            back = draw_button(self.screen, "Back", self.button_font, back_button_x, back_button_y, back_button_width, back_button_height, (0, 0, 0), (200, 200, 200))
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if back:
+                    self.sign_in_or_continue_as_guest()
 
             pygame.display.flip()
 
