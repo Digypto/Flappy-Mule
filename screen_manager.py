@@ -224,6 +224,34 @@ class ScreenManager:
 
             pygame.display.flip()
 
+    def sign_in_or_continue_as_guest(self):
+        button_x = WIDTH // 2 - 125
+        button_y = HEIGHT // 2 - 35
+        button_width = 200
+        button_height = 70
+
+        while True:
+            self.screen.blit(bg, (0, 0))
+
+            flappy_title = "Flappy Mule"
+            flappy_x = WIDTH // 2 - self.title_font.size(flappy_title)[0] // 2
+            flappy_y = HEIGHT // 6
+            draw_text_with_outline(self.screen, flappy_title, self.title_font, flappy_x, flappy_y)
+
+            sign_in = draw_button(self.screen, "Sign in", self.button_font, button_x - 50, button_y, button_width + 150, button_height, (0, 0, 0), (200, 200, 200))
+            guest = draw_button(self.screen, "Continue as a guest", self.button_font, button_x - 50, button_y + 100, button_width + 150, button_height, (0, 0, 0), (200, 200, 200))
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if sign_in:
+                    pass
+                if guest:
+                    self.main_menu()
+
+            pygame.display.flip()
+
     def run_game(self) -> bool:
         """
         Runs the main game loop, updating and rendering all elements.
