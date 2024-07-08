@@ -1,6 +1,7 @@
 import pygame
-
 import os
+import ctypes
+import subprocess
 
 from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
 from db.db_connection import get_db_connection
@@ -25,6 +26,7 @@ class ScreenManager:
     def __init__(self, screen, font_path):
         self.screen = screen
         self.font_path = font_path
+        self.player = None
         self.load_fonts()
 
     def load_fonts(self):
@@ -86,10 +88,18 @@ class ScreenManager:
                 if event.type == pygame.KEYDOWN:
                     if active:
                         if event.key == pygame.K_RETURN:
+                            try:
+                                ctypes.windll.user32.MessageBoxW(0, "Score saved!", "Popup", 0)
+                            except AttributeError:
+                                applescript = """
+                                    display dialog "Score saved!" ¬
+                                    with title "Popup" ¬
+                                    buttons {"OK"}
+                                    """
+                                subprocess.call("osascript -e '{}'".format(applescript), shell=True)
                             player.update_name(user_text)
-                            save_score(client, player.points, player.name)
+                            save_score(client, player.points, player.name)  # Save the score to the database
                             user_text = ''
-                            self.main_menu()
                         if event.key == pygame.K_BACKSPACE:
                             user_text = user_text[:-1]
                         else:
@@ -204,7 +214,10 @@ class ScreenManager:
 
             play = draw_button(self.screen, "Play", self.button_font, button_x, button_y, button_width + 50, button_height, (0, 0, 0), (200, 200, 200))
             leaderboard = draw_button(self.screen, "Leaderboard", self.button_font, button_x, button_y + 100, button_width + 50, button_height, (0, 0, 0), (200, 200, 200))
-            sign_in = draw_button(self.screen, "Sign in", self.base_font, 5, 5, 100, 40, (0, 0, 0), (200, 200, 200))
+            if self.player:
+                draw_text_with_outline(self.screen, f'User: {self.player.get_name()}', self.congratulations_font, 5, 5)
+            if not self.player:
+                sign_in = draw_button(self.screen, "Sign in", self.base_font, 5, 5, 100, 40, (0, 0, 0), (200, 200, 200))
 
 
             for event in pygame.event.get():
@@ -215,8 +228,9 @@ class ScreenManager:
                     self.run_game()
                 if leaderboard:
                     self.display_leaderboard()
-                if sign_in:
-                    self.sign_in_screen()
+                if not self.player:
+                    if sign_in:
+                        self.sign_in_screen()
 
             pygame.display.flip()
 
@@ -303,7 +317,20 @@ class ScreenManager:
                         else:
                             password_text += event.unicode
                 if sign_in:
-                    validate_sign_in(username_text, password_text)
+                    validation_bool = validate_sign_in(username_text, password_text)
+                    if validation_bool[0]:
+                        self.player = validation_bool[1]
+                        self.main_menu()
+                    if not validation_bool[0]:
+                        try:
+                            ctypes.windll.user32.MessageBoxW(0, "Wrong username or password.", "Popup", 0)
+                        except AttributeError:
+                            applescript = """
+                                display dialog "Wrong username or password." ¬
+                                with title "Popup" ¬
+                                buttons {"OK"}
+                                """
+                            subprocess.call("osascript -e '{}'".format(applescript), shell=True)
                     username_text = ''
                     password_text = ''
             if username_active:
@@ -354,7 +381,7 @@ class ScreenManager:
         powerups.empty()
 
         mule = Mule()
-        player = Player()
+        player = self.player
         all_sprites.add(mule)
         powerup = None
 

@@ -3,6 +3,7 @@ from pygame.locals import *
 from db.db_operations import save_user, get_users
 from db.db_connection import get_db_connection
 import hashlib
+from player import Player
 
 client = get_db_connection()
 
@@ -31,11 +32,13 @@ def validate_sign_in(username: str, password: str) -> bool:
     sha256.update(encoded_password)
     hashed_password = sha256.hexdigest()
     data = get_users(client)
+    player = Player()
     for json in data:
         user = json["user"]
         db_password = json["password"]
         if username == user and hashed_password == db_password:
-            return True
+            player.update_name(username)
+            return True, player
         else:
-            return False
+            return False, None
     
