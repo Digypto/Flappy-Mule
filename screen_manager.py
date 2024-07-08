@@ -26,7 +26,7 @@ class ScreenManager:
     def __init__(self, screen, font_path):
         self.screen = screen
         self.font_path = font_path
-        self.player = None
+        self.player = Player()
         self.load_fonts()
 
     def load_fonts(self):
@@ -38,9 +38,9 @@ class ScreenManager:
         self.button_font = pygame.font.Font(self.font_path, 48)
         self.score_font = pygame.font.Font(self.font_path, 120)
 
-    def ask_username_screen(self, player: Player):
-        score_label = "Score: " + str(player.points)
-        score_x = WIDTH // 3 - self.score_font.size(str(player.points))[1] // 2
+    def ask_username_screen(self):
+        score_label = "Score: " + str(self.player.points)
+        score_x = WIDTH // 3 - self.score_font.size(str(self.player.points))[1] // 2
         score_y = HEIGHT // 2 - self.score_font.size(score_label)[1] // 2 - 150
         draw_text_with_outline(self.screen, score_label, self.score_font, score_x, score_y)
 
@@ -53,6 +53,7 @@ class ScreenManager:
         username_x = 25
         username_y = text_y + 40
         draw_text_with_outline(self.screen, username_label, self.congratulations_font, username_x, username_y)
+
 
         input_box_y = username_y + 50
         input_rect = pygame.Rect(WIDTH // 2 - 175, input_box_y, 200, 50)
@@ -97,9 +98,11 @@ class ScreenManager:
                                     buttons {"OK"}
                                     """
                                 subprocess.call("osascript -e '{}'".format(applescript), shell=True)
-                            player.update_name(user_text)
-                            save_score(client, player.points, player.name)  # Save the score to the database
+                            self.player.update_name(user_text)
+                            save_score(client, self.player.points, self.player.name)  # Save the score to the database
                             user_text = ''
+                            self.player.reset_points()
+                            self.main_menu()
                         if event.key == pygame.K_BACKSPACE:
                             user_text = user_text[:-1]
                         else:
@@ -120,14 +123,15 @@ class ScreenManager:
 
             input_rect.w = max(200, text_surface.get_width() + 10)
 
-    def game_over_screen(self, player: Player):
+
+    def game_over_screen(self):
         game_over_text = "FOOO"
         text_x = WIDTH // 2 - self.game_over_font.size(game_over_text)[0] // 2
         text_y = HEIGHT // 2 - self.game_over_font.size(game_over_text)[1] // 2 - 150
         draw_text_with_outline(self.screen, game_over_text, self.game_over_font, text_x, text_y)
 
-        score_label = "Score: " + str(player.points)
-        score_x = WIDTH // 3 - self.score_font.size(str(player.points))[1] // 2
+        score_label = "Score: " + str(self.player.points)
+        score_x = WIDTH // 3 - self.score_font.size(str(self.player.points))[1] // 2
         score_y = text_y + 175
         draw_text_with_outline(self.screen, score_label, self.score_font, score_x, score_y)
 
@@ -142,6 +146,8 @@ class ScreenManager:
         menu_button_y = button_y + 75
         menu_button_width = 200
         menu_button_height = 70
+
+        self.player.reset_points()
 
         while True:
             play_again = draw_button(self.screen, "Play Again", self.button_font, button_x, button_y, button_width, button_height, (0, 0, 0), (200, 200, 200))
@@ -214,9 +220,9 @@ class ScreenManager:
 
             play = draw_button(self.screen, "Play", self.button_font, button_x, button_y, button_width + 50, button_height, (0, 0, 0), (200, 200, 200))
             leaderboard = draw_button(self.screen, "Leaderboard", self.button_font, button_x, button_y + 100, button_width + 50, button_height, (0, 0, 0), (200, 200, 200))
-            if self.player:
+            if self.player.get_name():
                 draw_text_with_outline(self.screen, f'User: {self.player.get_name()}', self.congratulations_font, 5, 5)
-            if not self.player:
+            if not self.player.get_name():
                 sign_in = draw_button(self.screen, "Sign in", self.base_font, 5, 5, 100, 40, (0, 0, 0), (200, 200, 200))
 
 
@@ -228,7 +234,7 @@ class ScreenManager:
                     self.run_game()
                 if leaderboard:
                     self.display_leaderboard()
-                if not self.player:
+                if not self.player.get_name():
                     if sign_in:
                         self.sign_in_screen()
 
@@ -452,7 +458,19 @@ class ScreenManager:
 
 
         if player.points > get_worst_score_in_db(client)[0] or get_worst_score_in_db(client)[1] < 5: #check if there are under 5 entries in db or the user is better than the worst score in db
-            return self.ask_username_screen(player)
+            if self.player.get_name():
+                save_score(client, player.points, player.name)
+                try:
+                    ctypes.windll.user32.MessageBoxW(0, "Your score was saved on the leaderboard", "Popup", 0)
+                except AttributeError:
+                    applescript = """
+                        display dialog "Your score was saved on the leaderboard" ¬
+                        with title "Popup" ¬
+                        buttons {"OK"}
+                        """
+                    subprocess.call("osascript -e '{}'".format(applescript), shell=True)
+            else:
+                return self.ask_username_screen()
         if get_worst_score_in_db(client)[0] >= player.points:
-            return self.game_over_screen(player)
+            return self.game_over_screen()
 
