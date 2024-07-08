@@ -1,6 +1,10 @@
 import pygame
 from pygame.locals import *
-from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
+from db.db_operations import save_user
+from db.db_connection import get_db_connection
+import hashlib
+
+client = get_db_connection()
 
 def crop_image(image: pygame.Surface) -> pygame.Surface:
     """
@@ -21,5 +25,9 @@ def crop_image(image: pygame.Surface) -> pygame.Surface:
     cropped_image.blit(image, (0, 0), rect)  # Identifies the transparent parts and removes them
     return cropped_image
 
-def validate_sign_in() -> bool:
-    pass
+def validate_sign_in(username: str, password: str) -> bool:
+    sha256 = hashlib.sha256()
+    print(username, password)
+    sha256.update(password)
+    print(username, password)
+    

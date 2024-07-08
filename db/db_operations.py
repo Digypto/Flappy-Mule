@@ -64,6 +64,14 @@ def get_worst_score_in_db(client: MongoClient):
             num_of_docs += 1
         return worst_val, num_of_docs
 
+def save_user(client: MongoClient, username: str, password: str):
+        try:
+            users_col = check_and_create_collection(client, "FlappyMuleUsers")
+            data = {"user": username, "password": password}
+            users_col.insert_one(data)
+        except Exception as e:
+            print(f"Error saving user: {e}")
+
 def check_and_create_collection(client: MongoClient, col_name):
         mydb = client["FlappyMule"]
         if col_name not in mydb.list_collection_names():

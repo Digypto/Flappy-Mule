@@ -3,7 +3,7 @@ import pygame
 import os
 
 from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
-from db.db_connection import get_db_connection, retrieve_db_credentials
+from db.db_connection import get_db_connection
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
 from drawing import draw_text_with_outline, draw_button
 
