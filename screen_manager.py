@@ -6,6 +6,7 @@ from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
 from db.db_connection import get_db_connection
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
 from drawing import draw_text_with_outline, draw_button
+from utils import validate_sign_in
 
 from player import Player
 from game_objects import Mule, all_sprites, pipes, coins, powerups, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe, create_powerup
@@ -292,21 +293,19 @@ class ScreenManager:
                         password_active = False
                 if event.type == pygame.KEYDOWN:
                     if username_active:
-                        if event.key == pygame.K_RETURN:
-                            username_text = ''
-                            self.main_menu()
                         if event.key == pygame.K_BACKSPACE:
                             username_text = username_text[:-1]
                         else:
                             username_text += event.unicode
                     if password_active:
-                        if event.key == pygame.K_RETURN:
-                            password_text = ''
-                            self.main_menu()
                         if event.key == pygame.K_BACKSPACE:
                             password_text = password_text[:-1]
                         else:
                             password_text += event.unicode
+                if sign_in:
+                    validate_sign_in(username_text, password_text)
+                    username_text = ''
+                    password_text = ''
             if username_active:
                 color_username = color_active
             else:

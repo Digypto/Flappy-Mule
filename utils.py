@@ -27,7 +27,9 @@ def crop_image(image: pygame.Surface) -> pygame.Surface:
 
 def validate_sign_in(username: str, password: str) -> bool:
     sha256 = hashlib.sha256()
-    print(username, password)
-    sha256.update(password)
-    print(username, password)
+    encoded_password = password.encode()
+    sha256.update(encoded_password)
+    hashed_password = sha256.hexdigest()
+    print(username, password, encoded_password, hashed_password)
+    #save_user(client, username, hashed_password)
     
