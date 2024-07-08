@@ -58,6 +58,9 @@ class Player(pygame.sprite.Sprite):
 
         return self.points
     
+    def reset_points(self) -> None:
+        self.points = -1
+    
     def activate_double_points(self):
         self.point_multiplier = 2
 

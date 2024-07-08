@@ -1,25 +1,18 @@
 import pygame
-from drawing import draw_text_with_outline, draw_button
-from player import Player
-from db.db_operations import save_score, get_high_scores
-from db.db_connection import get_db_connection, retrieve_db_credentials
 import os
+import ctypes
+import subprocess
 
-
-from db.db_operations import get_worst_score_in_db
-from db.db_connection import get_db_connection, retrieve_db_credentials
+from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
+from db.db_connection import get_db_connection
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
+from drawing import draw_text_with_outline, draw_button
+from utils import validate_sign_in
 
 from player import Player
-from game_objects import Mule, PowerUp, all_sprites, pipes, coins, powerups, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe, create_powerup
-from drawing import draw_text_with_outline
+from game_objects import Mule, all_sprites, pipes, coins, powerups, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe, create_powerup
 
-credential_dict = retrieve_db_credentials()
-user = credential_dict.get("user")
-password = credential_dict.get("password")
-host = credential_dict.get("host")
-appname = credential_dict.get("appname")
-client = get_db_connection(user, password, host, appname)
+client = get_db_connection()
 
 clock = pygame.time.Clock()
 
@@ -33,6 +26,7 @@ class ScreenManager:
     def __init__(self, screen, font_path):
         self.screen = screen
         self.font_path = font_path
+        self.player = Player()
         self.load_fonts()
 
     def load_fonts(self):
@@ -44,9 +38,9 @@ class ScreenManager:
         self.button_font = pygame.font.Font(self.font_path, 48)
         self.score_font = pygame.font.Font(self.font_path, 120)
 
-    def ask_username_screen(self, player: Player):
-        score_label = "Score: " + str(player.points)
-        score_x = WIDTH // 3 - self.score_font.size(str(player.points))[1] // 2
+    def ask_username_screen(self):
+        score_label = "Score: " + str(self.player.points)
+        score_x = WIDTH // 3 - self.score_font.size(str(self.player.points))[1] // 2
         score_y = HEIGHT // 2 - self.score_font.size(score_label)[1] // 2 - 150
         draw_text_with_outline(self.screen, score_label, self.score_font, score_x, score_y)
 
@@ -59,6 +53,7 @@ class ScreenManager:
         username_x = 25
         username_y = text_y + 40
         draw_text_with_outline(self.screen, username_label, self.congratulations_font, username_x, username_y)
+
 
         input_box_y = username_y + 50
         input_rect = pygame.Rect(WIDTH // 2 - 175, input_box_y, 200, 50)
@@ -94,9 +89,19 @@ class ScreenManager:
                 if event.type == pygame.KEYDOWN:
                     if active:
                         if event.key == pygame.K_RETURN:
-                            player.update_name(user_text)
-                            save_score(client, player.points, player.name)
+                            try:
+                                ctypes.windll.user32.MessageBoxW(0, "Score saved!", "Popup", 0)
+                            except AttributeError:
+                                applescript = """
+                                    display dialog "Score saved!" ¬
+                                    with title "Popup" ¬
+                                    buttons {"OK"}
+                                    """
+                                subprocess.call("osascript -e '{}'".format(applescript), shell=True)
+                            self.player.update_name(user_text)
+                            save_score(client, self.player.points, self.player.name)  # Save the score to the database
                             user_text = ''
+                            self.player.reset_points()
                             self.main_menu()
                         if event.key == pygame.K_BACKSPACE:
                             user_text = user_text[:-1]
@@ -118,14 +123,15 @@ class ScreenManager:
 
             input_rect.w = max(200, text_surface.get_width() + 10)
 
-    def game_over_screen(self, player: Player):
+
+    def game_over_screen(self):
         game_over_text = "FOOO"
         text_x = WIDTH // 2 - self.game_over_font.size(game_over_text)[0] // 2
         text_y = HEIGHT // 2 - self.game_over_font.size(game_over_text)[1] // 2 - 150
         draw_text_with_outline(self.screen, game_over_text, self.game_over_font, text_x, text_y)
 
-        score_label = "Score: " + str(player.points)
-        score_x = WIDTH // 3 - self.score_font.size(str(player.points))[1] // 2
+        score_label = "Score: " + str(self.player.points)
+        score_x = WIDTH // 3 - self.score_font.size(str(self.player.points))[1] // 2
         score_y = text_y + 175
         draw_text_with_outline(self.screen, score_label, self.score_font, score_x, score_y)
 
@@ -140,6 +146,8 @@ class ScreenManager:
         menu_button_y = button_y + 75
         menu_button_width = 200
         menu_button_height = 70
+
+        self.player.reset_points()
 
         while True:
             play_again = draw_button(self.screen, "Play Again", self.button_font, button_x, button_y, button_width, button_height, (0, 0, 0), (200, 200, 200))
@@ -212,7 +220,10 @@ class ScreenManager:
 
             play = draw_button(self.screen, "Play", self.button_font, button_x, button_y, button_width + 50, button_height, (0, 0, 0), (200, 200, 200))
             leaderboard = draw_button(self.screen, "Leaderboard", self.button_font, button_x, button_y + 100, button_width + 50, button_height, (0, 0, 0), (200, 200, 200))
-            sign_in = draw_button(self.screen, "Sign in", self.base_font, 5, 5, 100, 40, (0, 0, 0), (200, 200, 200))
+            if self.player.get_name():
+                draw_text_with_outline(self.screen, f'User: {self.player.get_name()}', self.congratulations_font, 5, 5)
+            if not self.player.get_name():
+                sign_in = draw_button(self.screen, "Sign in", self.base_font, 5, 5, 100, 40, (0, 0, 0), (200, 200, 200))
 
 
             for event in pygame.event.get():
@@ -223,8 +234,9 @@ class ScreenManager:
                     self.run_game()
                 if leaderboard:
                     self.display_leaderboard()
-                if sign_in:
-                    self.sign_in_screen()
+                if not self.player.get_name():
+                    if sign_in:
+                        self.sign_in_screen()
 
             pygame.display.flip()
 
@@ -301,21 +313,32 @@ class ScreenManager:
                         password_active = False
                 if event.type == pygame.KEYDOWN:
                     if username_active:
-                        if event.key == pygame.K_RETURN:
-                            username_text = ''
-                            self.main_menu()
                         if event.key == pygame.K_BACKSPACE:
                             username_text = username_text[:-1]
                         else:
                             username_text += event.unicode
                     if password_active:
-                        if event.key == pygame.K_RETURN:
-                            password_text = ''
-                            self.main_menu()
                         if event.key == pygame.K_BACKSPACE:
                             password_text = password_text[:-1]
                         else:
                             password_text += event.unicode
+                if sign_in:
+                    validation_bool = validate_sign_in(username_text, password_text)
+                    if validation_bool[0]:
+                        self.player = validation_bool[1]
+                        self.main_menu()
+                    if not validation_bool[0]:
+                        try:
+                            ctypes.windll.user32.MessageBoxW(0, "Wrong username or password.", "Popup", 0)
+                        except AttributeError:
+                            applescript = """
+                                display dialog "Wrong username or password." ¬
+                                with title "Popup" ¬
+                                buttons {"OK"}
+                                """
+                            subprocess.call("osascript -e '{}'".format(applescript), shell=True)
+                    username_text = ''
+                    password_text = ''
             if username_active:
                 color_username = color_active
             else:
@@ -364,7 +387,7 @@ class ScreenManager:
         powerups.empty()
 
         mule = Mule()
-        player = Player()
+        player = self.player
         all_sprites.add(mule)
         powerup = None
 
@@ -435,7 +458,19 @@ class ScreenManager:
 
 
         if player.points > get_worst_score_in_db(client)[0] or get_worst_score_in_db(client)[1] < 5: #check if there are under 5 entries in db or the user is better than the worst score in db
-            return self.ask_username_screen(player)
+            if self.player.get_name():
+                save_score(client, player.points, player.name)
+                try:
+                    ctypes.windll.user32.MessageBoxW(0, "Your score was saved on the leaderboard", "Popup", 0)
+                except AttributeError:
+                    applescript = """
+                        display dialog "Your score was saved on the leaderboard" ¬
+                        with title "Popup" ¬
+                        buttons {"OK"}
+                        """
+                    subprocess.call("osascript -e '{}'".format(applescript), shell=True)
+            else:
+                return self.ask_username_screen()
         if get_worst_score_in_db(client)[0] >= player.points:
-            return self.game_over_screen(player)
+            return self.game_over_screen()
 

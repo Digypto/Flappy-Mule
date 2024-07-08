@@ -2,7 +2,8 @@ import os
 from pymongo import MongoClient
 
 
-def get_db_connection(user: str, password: str, host: str, appname: str) -> MongoClient:
+
+def get_db_connection() -> MongoClient:
     """
     Establishes a connection to the MongoDB database.
 
@@ -24,6 +25,11 @@ def get_db_connection(user: str, password: str, host: str, appname: str) -> Mong
     pymongo.MongoClient
         The MongoDB client object.
     """
+    credential_dict = retrieve_db_credentials()
+    user = credential_dict.get("user")
+    password = credential_dict.get("password")
+    host = credential_dict.get("host")
+    appname = credential_dict.get("appname")
     try:
         conn_str = f"mongodb+srv://{user}:{password}@{host}/?retryWrites=true&w=majority&appName={appname}"
         client = MongoClient(conn_str)
