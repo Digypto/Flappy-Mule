@@ -1,25 +1,16 @@
 import pygame
-from drawing import draw_text_with_outline, draw_button
-from player import Player
-from db.db_operations import save_score, get_high_scores
-from db.db_connection import get_db_connection, retrieve_db_credentials
+
 import os
 
-
-from db.db_operations import get_worst_score_in_db
+from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
 from db.db_connection import get_db_connection, retrieve_db_credentials
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
+from drawing import draw_text_with_outline, draw_button
 
 from player import Player
-from game_objects import Mule, PowerUp, all_sprites, pipes, coins, powerups, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe, create_powerup
-from drawing import draw_text_with_outline
+from game_objects import Mule, all_sprites, pipes, coins, powerups, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe, create_powerup
 
-credential_dict = retrieve_db_credentials()
-user = credential_dict.get("user")
-password = credential_dict.get("password")
-host = credential_dict.get("host")
-appname = credential_dict.get("appname")
-client = get_db_connection(user, password, host, appname)
+client = get_db_connection()
 
 clock = pygame.time.Clock()
 

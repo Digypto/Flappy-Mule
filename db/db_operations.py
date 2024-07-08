@@ -3,13 +3,6 @@ from pymongo import MongoClient
 import pymongo
 
 
-credential_dict = retrieve_db_credentials()
-dbname = credential_dict.get("dbname")
-user = credential_dict.get("user")
-password = credential_dict.get("password")
-host = credential_dict.get("host")
-port = credential_dict.get("port")
-
 def save_score(client: MongoClient, score: int, name: str) -> None:
     """
     Saves the score to the 'highscores' collection in MongoDB.
@@ -22,7 +15,7 @@ def save_score(client: MongoClient, score: int, name: str) -> None:
         The score to be saved.
     """
     try:
-        highscores_col = check_and_create_collection(client)
+        highscores_col = check_and_create_collection(client, "FlappyMuleScores")
         num_documents = highscores_col.count_documents({})
         lowest_score_doc = highscores_col.find().sort('score', pymongo.ASCENDING).limit(1)
         if num_documents < 5 and name != "":
@@ -71,9 +64,9 @@ def get_worst_score_in_db(client: MongoClient):
             num_of_docs += 1
         return worst_val, num_of_docs
 
-def check_and_create_collection(client: MongoClient):
+def check_and_create_collection(client: MongoClient, col_name):
         mydb = client["FlappyMule"]
-        if "FlappyMuleScores" not in mydb.list_collection_names():
-            mycol = mydb["FlappyMuleScores"]
-        mycol = mydb["FlappyMuleScores"]
+        if col_name not in mydb.list_collection_names():
+            mycol = mydb[col_name]
+        mycol = mydb[col_name]
         return mycol

@@ -1,5 +1,6 @@
 import pygame
 from pygame.locals import *
+from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
 
 def crop_image(image: pygame.Surface) -> pygame.Surface:
     """
@@ -19,3 +20,6 @@ def crop_image(image: pygame.Surface) -> pygame.Surface:
     cropped_image = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
     cropped_image.blit(image, (0, 0), rect)  # Identifies the transparent parts and removes them
     return cropped_image
+
+def validate_sign_in() -> bool:
+    pass
