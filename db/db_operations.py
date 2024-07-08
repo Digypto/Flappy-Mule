@@ -72,6 +72,14 @@ def save_user(client: MongoClient, username: str, password: str):
         except Exception as e:
             print(f"Error saving user: {e}")
 
+def get_users(client: MongoClient):
+        try:
+            db = client["FlappyMule"]
+            users_col = db['FlappyMuleUsers'].find()
+            return users_col
+        except Exception as e:
+            print(f"Error retrieving users: {e}")
+
 def check_and_create_collection(client: MongoClient, col_name):
         mydb = client["FlappyMule"]
         if col_name not in mydb.list_collection_names():

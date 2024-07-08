@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-from db.db_operations import save_user
+from db.db_operations import save_user, get_users
 from db.db_connection import get_db_connection
 import hashlib
 
@@ -30,6 +30,12 @@ def validate_sign_in(username: str, password: str) -> bool:
     encoded_password = password.encode()
     sha256.update(encoded_password)
     hashed_password = sha256.hexdigest()
-    print(username, password, encoded_password, hashed_password)
-    #save_user(client, username, hashed_password)
+    data = get_users(client)
+    for json in data:
+        user = json["user"]
+        db_password = json["password"]
+        if username == user and hashed_password == db_password:
+            return True
+        else:
+            return False
     
