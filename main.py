@@ -24,7 +24,7 @@ screen_manager = ScreenManager(screen, font_path)
 
 
 if __name__ == "__main__":
-    screen_manager.main_menu()
+    screen_manager.sign_in_or_continue_as_guest()
     while True:
         screen_manager.run_game()
 
