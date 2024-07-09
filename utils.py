@@ -39,8 +39,7 @@ def validate_sign_in(username: str, password: str) -> bool:
         if username == user and hashed_password == db_password:
             player.update_name(username)
             return True, player
-        else:
-            return False, None
+    return False, None
         
 def validate_registration(username: str, password: str, password_again: str) -> bool:
     sha256 = hashlib.sha256()
