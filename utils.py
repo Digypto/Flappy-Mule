@@ -41,4 +41,34 @@ def validate_sign_in(username: str, password: str) -> bool:
             return True, player
         else:
             return False, None
+        
+def validate_registration(username: str, password: str, password_again: str) -> bool:
+    sha256 = hashlib.sha256()
+    encoded_password = password.encode()
+    sha256.update(encoded_password)
+    hashed_password = sha256.hexdigest()
+    data = get_users(client)
+    player = Player()
+    return_bool = False
+    return_text = None
+    for json in data:
+        user = json["user"]
+        if username == user:
+            return_bool = False
+            return_text = "Username already taken."
+            break
+        if password.lower() != password_again.lower():
+            return_bool = False
+            return_text = "The passwords do not match."
+            break
+        if len(password.lower()) < 5:
+            return_bool = False
+            return_text = "The passwords needs to contain at least 5 characters."
+            break
+        player.update_name(username)
+        save_user(client, username, hashed_password)
+        return_bool = True
+        return_text = "Registration successful."
+
+    return return_bool, return_text, player
     

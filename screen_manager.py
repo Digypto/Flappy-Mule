@@ -7,7 +7,7 @@ from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
 from db.db_connection import get_db_connection
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
 from drawing import draw_text_with_outline, draw_button
-from utils import validate_sign_in
+from utils import validate_sign_in, validate_registration
 
 from player import Player
 from game_objects import Mule, all_sprites, pipes, coins, powerups, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe, create_powerup
@@ -31,6 +31,7 @@ class ScreenManager:
 
     def load_fonts(self):
         self.base_font = pygame.font.Font(self.font_path, 32)
+        self.register_font = pygame.font.Font(self.font_path, 16)
         self.leaderboard_font = pygame.font.Font(self.font_path, 36)
         self.congratulations_font = pygame.font.Font(self.font_path, 28)
         self.title_font = pygame.font.Font(self.font_path, 90)
@@ -79,6 +80,7 @@ class ScreenManager:
                     pygame.quit()
                     exit()
                 if no_button:
+                    self.player.reset_points()
                     self.main_menu()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if input_rect.collidepoint(event.pos):
@@ -267,6 +269,150 @@ class ScreenManager:
                     self.main_menu()
 
             pygame.display.flip()
+    
+    def register_screen(self):
+        button_x = WIDTH // 2 - 100
+        button_y = HEIGHT - 150
+        button_width = 200
+        button_height = 70
+
+        color_active = pygame.Color((200, 200, 200))
+        color_passive = pygame.Color('black')
+        color_username = color_passive
+        color_password = color_passive
+        color_password_again = color_passive
+        username_box_y = 50
+        username_rect = pygame.Rect(WIDTH // 2 - 100, username_box_y, 200, 50)
+        password_box_y = username_box_y + 75
+        password_rect = pygame.Rect(WIDTH // 2 - 100, password_box_y, 200, 50)
+        password_again_box_y = password_box_y + 75
+        password_again_rect = pygame.Rect(WIDTH // 2 - 100, password_again_box_y, 200, 50)
+
+        username_active = False
+        username_text = ''
+
+        password_active = False
+        password_text = ''
+
+        password_again_active = False
+        password_again_text = ''
+
+        while True:
+            self.screen.blit(bg, (0, 0))
+
+            back = draw_button(self.screen, "Back", self.button_font, button_x, button_y, button_width, button_height, (0, 0, 0), (200, 200, 200))
+            register = draw_button(self.screen, "Register", self.button_font, button_x, password_again_box_y + 75, button_width, button_height, (0, 0, 0), (200, 200, 200))
+
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if back:
+                    self.sign_in_screen()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if username_rect.collidepoint(event.pos):
+                        username_active = True
+                    else:
+                        username_active = False
+                    if password_rect.collidepoint(event.pos):
+                        password_active = True
+                    else:
+                        password_active = False
+                    if password_again_rect.collidepoint(event.pos):
+                        password_again_active = True
+                    else:
+                        password_again_active = False
+                if event.type == pygame.KEYDOWN:
+                    if username_active:
+                        if event.key == pygame.K_BACKSPACE:
+                            username_text = username_text[:-1]
+                        else:
+                            username_text += event.unicode
+                    if password_active:
+                        if event.key == pygame.K_BACKSPACE:
+                            password_text = password_text[:-1]
+                        else:
+                            password_text += event.unicode
+                    if password_again_active:
+                        if event.key == pygame.K_BACKSPACE:
+                            password_again_text = password_again_text[:-1]
+                        else:
+                            password_again_text += event.unicode    
+                if register:
+                    validation = validate_registration(username_text, password_text, password_again_text)
+                    validation_bool = validation[0]
+                    validation__text = validation[1]
+                    if validation_bool:
+                        try:
+                            ctypes.windll.user32.MessageBoxW(0, validation__text, "Popup", 0)
+                        except AttributeError:
+                            applescript = """
+                                display dialog "Registration successful." ¬
+                                with title "Popup" ¬
+                                buttons {"OK"}
+                                """
+                            subprocess.call("osascript -e '{}'".format(applescript), shell=True) 
+                        self.player = validation[2]
+                        self.main_menu()
+                    if not validation_bool:
+                        try:
+                            ctypes.windll.user32.MessageBoxW(0, validation__text, "Popup", 0)
+                        except AttributeError:
+                            applescript = """
+                                display dialog "Wrong username or password." ¬
+                                with title "Popup" ¬
+                                buttons {"OK"}
+                                """
+                            subprocess.call("osascript -e '{}'".format(applescript), shell=True) #TODO input validation_error_text to applescipt
+                    username_text = ''
+                    password_text = ''
+                    password_again_text = ''
+            if username_active:
+                color_username = color_active
+            else:
+                color_username = color_passive
+            if password_active:
+                color_password = color_active
+            else:
+                color_password = color_passive
+            if password_again_active:
+                color_password_again = color_active
+            else:
+                color_password_again = color_passive
+
+            pygame.draw.rect(self.screen, color_username, username_rect)
+
+            if username_text == '':
+                text_surface = self.base_font.render("Username", True, (198, 215, 255))
+            else:
+                text_surface = self.base_font.render(username_text, True, (255, 255, 255))
+            self.screen.blit(text_surface, (username_rect.x + 5, username_rect.y + 5))
+
+            username_rect.w = max(200, text_surface.get_width() + 10)
+
+            pygame.draw.rect(self.screen, color_password, password_rect)
+
+            if password_text == '':
+                text_surface = self.base_font.render("Password", True, (198, 215, 255))
+            else:
+                text_surface = self.base_font.render(password_text, True, (255, 255, 255))
+            self.screen.blit(text_surface, (password_rect.x + 5, password_rect.y + 5))
+
+            password_rect.w = max(200, text_surface.get_width() + 10)
+
+            pygame.draw.rect(self.screen, color_password_again, password_again_rect)
+
+            if password_again_text == '':
+                text_surface = self.base_font.render("Password again", True, (198, 215, 255))
+            else:
+                text_surface = self.base_font.render(password_again_text, True, (255, 255, 255))
+            self.screen.blit(text_surface, (password_again_rect.x + 5, password_again_rect.y + 5))
+
+            password_again_rect.w = max(200, text_surface.get_width() + 10)
+
+            pygame.display.flip()
+
 
     def sign_in_screen(self):
         button_x = WIDTH // 2 - 100
@@ -293,6 +439,7 @@ class ScreenManager:
             self.screen.blit(bg, (0, 0))
 
             back = draw_button(self.screen, "Back", self.button_font, button_x, button_y, button_width, button_height, (0, 0, 0), (200, 200, 200))
+            register = draw_button(self.screen, "Don't have an account? Register here", self.register_font, 5, 5, 215, 30, (0, 0, 0), (200, 200, 200))
             sign_in = draw_button(self.screen, "Sign in", self.button_font, button_x, password_box_y + 75, button_width, button_height, (0, 0, 0), (200, 200, 200))
 
 
@@ -300,6 +447,8 @@ class ScreenManager:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
+                if register:
+                    self.register_screen()
                 if back:
                     self.sign_in_or_continue_as_guest()
                 if event.type == pygame.MOUSEBUTTONDOWN:
