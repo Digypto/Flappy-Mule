@@ -31,6 +31,7 @@ class ScreenManager:
 
     def load_fonts(self):
         self.base_font = pygame.font.Font(self.font_path, 32)
+        self.register_font = pygame.font.Font(self.font_path, 16)
         self.leaderboard_font = pygame.font.Font(self.font_path, 36)
         self.congratulations_font = pygame.font.Font(self.font_path, 28)
         self.title_font = pygame.font.Font(self.font_path, 90)
@@ -294,6 +295,7 @@ class ScreenManager:
             self.screen.blit(bg, (0, 0))
 
             back = draw_button(self.screen, "Back", self.button_font, button_x, button_y, button_width, button_height, (0, 0, 0), (200, 200, 200))
+            register = draw_button(self.screen, "Don't have an account? Register here", self.register_font, 5, 5, 215, 30, (0, 0, 0), (200, 200, 200))
             sign_in = draw_button(self.screen, "Sign in", self.button_font, button_x, password_box_y + 75, button_width, button_height, (0, 0, 0), (200, 200, 200))
 
 
