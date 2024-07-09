@@ -79,6 +79,7 @@ class ScreenManager:
                     pygame.quit()
                     exit()
                 if no_button:
+                    self.player.reset_points()
                     self.main_menu()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if input_rect.collidepoint(event.pos):
