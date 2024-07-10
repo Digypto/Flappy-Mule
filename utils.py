@@ -55,19 +55,20 @@ def validate_registration(username: str, password: str, password_again: str) -> 
         if username == user:
             return_bool = False
             return_text = "Username already taken."
-            break
-        if password.lower() != password_again.lower():
-            return_bool = False
-            return_text = "The passwords do not match."
-            break
-        if len(password.lower()) < 5:
-            return_bool = False
-            return_text = "The passwords needs to contain at least 5 characters."
-            break
-        player.update_name(username)
-        save_user(client, username, hashed_password)
-        return_bool = True
-        return_text = "Registration successful."
+            return return_bool, return_text, player
+    if password.lower() != password_again.lower():
+        return_bool = False
+        return_text = "The passwords do not match."
+        return return_bool, return_text, player
+    if len(password.lower()) < 5:
+        return_bool = False
+        return_text = "The passwords needs to contain at least 5 characters."
+        return return_bool, return_text, player
+
+    player.update_name(username)
+    save_user(client, username, hashed_password)
+    return_bool = True
+    return_text = "Registration successful."
 
     return return_bool, return_text, player
     

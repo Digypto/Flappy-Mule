@@ -1,6 +1,7 @@
 from db.db_connection import retrieve_db_credentials
 from pymongo import MongoClient
 import pymongo
+from datetime import datetime
 
 
 def save_score(client: MongoClient, score: int, name: str) -> None:
@@ -65,12 +66,31 @@ def get_worst_score_in_db(client: MongoClient):
         return worst_val, num_of_docs
 
 def save_user(client: MongoClient, username: str, password: str):
+        date_today = datetime.today().strftime('%Y-%m-%d')
         try:
             users_col = check_and_create_collection(client, "FlappyMuleUsers")
-            data = {"user": username, "password": password}
+            data = {"user": username, "password": password, "score": 0, "last_sign_in": date_today}
             users_col.insert_one(data)
         except Exception as e:
             print(f"Error saving user: {e}")
+
+def update_user_lifetime_score(client: MongoClient, username: str, score: int):
+        try:
+            users_col = check_and_create_collection(client, "FlappyMuleUsers")
+            #data = {{"user": username}, {"$set":{"score": score}}}
+            users_col.find_one_and_update({"user": username}, {"$inc":{"score": score}})
+            #users_col.update_many({"score": {"$exists": False}}, {"$set": {"score": score}})
+        except Exception as e:
+            print(f"Error saving score: {e}")
+
+def update_user_latest_sign_in(client: MongoClient, username: str):
+        date_today = datetime.today().strftime('%Y-%m-%d')
+        try:
+            users_col = check_and_create_collection(client, "FlappyMuleUsers")
+            users_col.find_one_and_update({"user": username}, {"$set":{"last_sign_in": date_today}})
+            #users_col.update_many({"last_sign_in": {"$exists": False}}, {"$set": {"last_sign_in": date_today}})
+        except Exception as e:
+            print(f"Error saving date: {e}")
 
 def get_users(client: MongoClient):
         try:

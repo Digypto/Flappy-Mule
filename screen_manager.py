@@ -3,11 +3,12 @@ import os
 import ctypes
 import subprocess
 
-from db.db_operations import save_score, get_high_scores, get_worst_score_in_db
+from db.db_operations import save_score, get_high_scores, get_worst_score_in_db, update_user_lifetime_score, update_user_latest_sign_in
 from db.db_connection import get_db_connection
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
 from drawing import draw_text_with_outline, draw_button
 from utils import validate_sign_in, validate_registration
+from data_processing import database_to_dataframe
 
 from player import Player
 from game_objects import Mule, all_sprites, pipes, coins, powerups, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe, create_powerup
@@ -173,6 +174,7 @@ class ScreenManager:
     def display_leaderboard(self):
         high_scores_cursor = get_high_scores(client)
         high_scores = list(high_scores_cursor)
+        database_to_dataframe("scores")
 
         running = True
         while running:
@@ -475,6 +477,7 @@ class ScreenManager:
                     validation_bool = validate_sign_in(username_text, password_text)
                     if validation_bool[0]:
                         self.player = validation_bool[1]
+                        update_user_latest_sign_in(client, "jee")
                         self.main_menu()
                     if not validation_bool[0]:
                         try:
@@ -609,6 +612,7 @@ class ScreenManager:
         if player.points > get_worst_score_in_db(client)[0] or get_worst_score_in_db(client)[1] < 5: #check if there are under 5 entries in db or the user is better than the worst score in db
             if self.player.get_name():
                 save_score(client, player.points, player.name)
+                update_user_lifetime_score(client, self.player.name, self.player.points)
                 try:
                     ctypes.windll.user32.MessageBoxW(0, "Your score was saved on the leaderboard", "Popup", 0)
                 except AttributeError:
@@ -621,5 +625,6 @@ class ScreenManager:
             else:
                 return self.ask_username_screen()
         if get_worst_score_in_db(client)[0] >= player.points:
+            update_user_lifetime_score(client, self.player.name, self.player.points)
             return self.game_over_screen()
 
