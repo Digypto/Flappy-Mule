@@ -8,6 +8,7 @@ from db.db_connection import get_db_connection
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
 from drawing import draw_text_with_outline, draw_button
 from utils import validate_sign_in, validate_registration
+from data_processing import database_to_dataframe
 
 from player import Player
 from game_objects import Mule, all_sprites, pipes, coins, powerups, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe, create_powerup
@@ -173,6 +174,7 @@ class ScreenManager:
     def display_leaderboard(self):
         high_scores_cursor = get_high_scores(client)
         high_scores = list(high_scores_cursor)
+        database_to_dataframe("scores")
 
         running = True
         while running:
