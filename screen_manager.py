@@ -171,6 +171,32 @@ class ScreenManager:
                 if main_menu_button:
                     self.main_menu()
 
+    def achievements_screen(self):
+
+        running = True
+        while running:
+            self.screen.blit(bg, (0,0))
+
+            basic_achievements_title = "Basic achievements"
+            title_x = WIDTH // 2 - self.title_font.size(basic_achievements_title)[0] // 2
+            title_y = HEIGHT // 20
+            draw_text_with_outline(self.screen, basic_achievements_title, self.title_font, title_x, title_y)
+
+            back_button_x = WIDTH // 2 - 100
+            back_button_y = HEIGHT - 100
+            back_button_width = 200
+            back_button_height = 70
+            back = draw_button(self.screen, "Back", self.button_font, back_button_x, back_button_y, back_button_width, back_button_height, (0, 0, 0), (200, 200, 200))
+
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if back:
+                    self.main_menu()
+
     def display_leaderboard(self):
         high_scores_cursor = get_high_scores(client)
         high_scores = list(high_scores_cursor)
@@ -223,7 +249,8 @@ class ScreenManager:
             draw_text_with_outline(self.screen, flappy_title, self.title_font, flappy_x, flappy_y)
 
             play = draw_button(self.screen, "Play", self.button_font, button_x, button_y, button_width + 50, button_height, (0, 0, 0), (200, 200, 200))
-            leaderboard = draw_button(self.screen, "Leaderboard", self.button_font, button_x, button_y + 100, button_width + 50, button_height, (0, 0, 0), (200, 200, 200))
+            leaderboard = draw_button(self.screen, "Leaderboard", self.leaderboard_font, button_x, button_y + 100, button_width + 50, button_height, (0, 0, 0), (200, 200, 200))
+            achievements = draw_button(self.screen, "Achievements", self.button_font, button_x, button_y + 200, button_width + 50, button_height, (0, 0, 0), (200, 200, 200))
             if self.player.get_name():
                 draw_text_with_outline(self.screen, f'User: {self.player.get_name()}', self.congratulations_font, 5, 5)
             if not self.player.get_name():
@@ -238,6 +265,8 @@ class ScreenManager:
                     self.run_game()
                 if leaderboard:
                     self.display_leaderboard()
+                if achievements:
+                    self.achievements_screen()
                 if not self.player.get_name():
                     if sign_in:
                         self.sign_in_screen()
