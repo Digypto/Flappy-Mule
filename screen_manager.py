@@ -6,7 +6,7 @@ import subprocess
 from db.db_operations import save_score, get_high_scores, get_worst_score_in_db, update_user_lifetime_score, update_user_latest_sign_in
 from db.db_connection import get_db_connection
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
-from drawing import draw_text_with_outline, draw_button
+from drawing import draw_text_with_outline, draw_button, draw_rect
 from utils import validate_sign_in, validate_registration, crop_image
 from data_processing import database_to_dataframe
 
@@ -672,7 +672,10 @@ class Achievements():
             elif self.current_page != "Basic achievements":
                 left_arrow = draw_button(self.screen, self.arrow_left, self.button_font, 10, 440, 50, 50, (100, 100, 100), (200, 200, 200))
 
+            draw_rect(self.screen, title_x - 25, title_y + 50, 300, 400, (0, 0, 0), 5, 4)
+            draw_rect(self.screen, title_x - 20, title_y + 55, 290, 390, (145, 165, 16), 0, 0)
             right_arrow = draw_button(self.screen, self.arrow_right, self.button_font, 420, 440, 50, 50, (100, 100, 100), (200, 200, 200))
+            
             pygame.display.flip()
 
             for event in pygame.event.get():

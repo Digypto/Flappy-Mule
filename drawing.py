@@ -83,3 +83,8 @@ def draw_button(screen: pygame.surface.Surface, text: str, font: pygame.font.Fon
     except TypeError:
         screen.blit(text, text.get_rect(center = rect.center))
     return False
+
+
+def draw_rect(screen: pygame.surface.Surface, x, y, width, height, color: tuple, border_radius: int, rounded: int):
+    rect = pygame.Rect(x, y, width, height)
+    pygame.draw.rect(screen, color, rect, border_radius, rounded)
