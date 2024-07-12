@@ -29,6 +29,7 @@ class ScreenManager:
         self.font_path = font_path
         self.player = Player()
         self.load_fonts()
+        self.achievements = Achievements(screen, self, self.font_path, self.title_font, self.button_font)
 
     def load_fonts(self):
         self.base_font = pygame.font.Font(self.font_path, 32)
@@ -171,31 +172,6 @@ class ScreenManager:
                 if main_menu_button:
                     self.main_menu()
 
-    def achievements_screen(self):
-
-        running = True
-        while running:
-            self.screen.blit(bg, (0,0))
-
-            basic_achievements_title = "Basic achievements"
-            title_x = WIDTH // 2 - self.title_font.size(basic_achievements_title)[0] // 2
-            title_y = HEIGHT // 20
-            draw_text_with_outline(self.screen, basic_achievements_title, self.title_font, title_x, title_y)
-
-            back_button_x = WIDTH // 2 - 100
-            back_button_y = HEIGHT - 100
-            back_button_width = 200
-            back_button_height = 70
-            back = draw_button(self.screen, "Back", self.button_font, back_button_x, back_button_y, back_button_width, back_button_height, (0, 0, 0), (200, 200, 200))
-
-            pygame.display.flip()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-                if back:
-                    self.main_menu()
 
     def display_leaderboard(self):
         high_scores_cursor = get_high_scores(client)
@@ -266,7 +242,7 @@ class ScreenManager:
                 if leaderboard:
                     self.display_leaderboard()
                 if achievements:
-                    self.achievements_screen()
+                    self.achievements.achievements_screen("Basic achievements")
                 if not self.player.get_name():
                     if sign_in:
                         self.sign_in_screen()
@@ -657,3 +633,40 @@ class ScreenManager:
             update_user_lifetime_score(client, self.player.name, self.player.points)
             return self.game_over_screen()
 
+
+
+class Achievements():
+    def __init__(self, screen, screen_manager, font_path, title_font, button_font) -> None:
+        self.screen = screen
+        self.font_path = font_path
+        self.title_font = title_font
+        self.button_font = button_font
+        self.screen_manager = screen_manager
+        self.arrow_right = pygame.image.load('right_arrow_transparent.png').convert_alpha()
+        self.arrow_left = pygame.image.load('left_arrow_transparent.png').convert_alpha()
+
+    def achievements_screen(self, title):
+
+        running = True
+        while running:
+            self.screen.blit(bg, (0,0))
+
+            achievements_title = title
+            title_x = WIDTH // 2 - self.title_font.size(achievements_title)[0] // 2
+            title_y = HEIGHT // 20
+            draw_text_with_outline(self.screen, achievements_title, self.title_font, title_x, title_y)
+
+            back_button_x = WIDTH // 2 - 100
+            back_button_y = HEIGHT - 100
+            back_button_width = 200
+            back_button_height = 70
+            back = draw_button(self.screen, "Back", self.button_font, back_button_x, back_button_y, back_button_width, back_button_height, (0, 0, 0), (200, 200, 200))
+
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if back:
+                    self.screen_manager.main_menu()
