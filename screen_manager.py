@@ -6,7 +6,7 @@ import subprocess
 from db.db_operations import save_score, get_high_scores, get_worst_score_in_db, update_user_lifetime_score, update_user_latest_sign_in
 from db.db_connection import get_db_connection
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
-from drawing import draw_text_with_outline, draw_button, draw_rect
+from drawing import draw_text_with_outline, draw_button, draw_rect, add_achievements_text
 from utils import validate_sign_in, validate_registration, crop_image
 from data_processing import database_to_dataframe
 
@@ -29,11 +29,14 @@ class ScreenManager:
         self.font_path = font_path
         self.player = Player()
         self.load_fonts()
-        self.achievements = Achievements(screen, self, self.font_path, self.leaderboard_font, self.button_font)
+        self.achievements = Achievements(screen, self, self.font_path, self.leaderboard_font, self.button_font, self.achievement_description, self.achievement_title)
 
     def load_fonts(self):
         self.base_font = pygame.font.Font(self.font_path, 32)
-        self.register_font = pygame.font.Font(self.font_path, 16)
+        self.sign_in_font = pygame.font.SysFont(self.font_path, 48)
+        self.achievement_title = pygame.font.SysFont(self.font_path, 32, bold=True)
+        self.achievement_description = pygame.font.SysFont(self.font_path, 16)
+        self.register_font = pygame.font.SysFont(self.font_path, 16)
         self.leaderboard_font = pygame.font.Font(self.font_path, 36)
         self.congratulations_font = pygame.font.Font(self.font_path, 28)
         self.title_font = pygame.font.Font(self.font_path, 90)
@@ -636,20 +639,30 @@ class ScreenManager:
 
 
 class Achievements():
-    def __init__(self, screen, screen_manager, font_path, title_font, button_font) -> None:
+    def __init__(self, screen, screen_manager, font_path, title_font, button_font, achievement_description, achievement_title) -> None:
         self.screen = screen
         self.font_path = font_path
         self.title_font = title_font
         self.button_font = button_font
+        self.achievement_description = achievement_description
+        self.achievement_title = achievement_title
         self.screen_manager = screen_manager
         self.arrow_right = pygame.image.load(f'{os.getcwd()}/assets/right_arrow_transparent.png').convert_alpha()
         self.arrow_right = pygame.transform.scale(self.arrow_right, (50, 50))
         self.arrow_right = crop_image(self.arrow_right)
+        self.star = pygame.image.load(f'{os.getcwd()}/assets/star.png').convert_alpha()
+        self.star = pygame.transform.scale(self.star, (150, 150))
+        self.star = crop_image(self.star)
         self.arrow_left = pygame.image.load(f'{os.getcwd()}/assets/left_arrow_transparent.png').convert_alpha()
         self.arrow_left = pygame.transform.scale(self.arrow_left, (50, 50))
         self.arrow_left = crop_image(self.arrow_left)
         self.page_num = 1
         self.current_page = "Basic achievements"
+        self.achievements_dict = {"First Flight": "Successfully pass the first pipe",
+                            "Novice Flyer": "Pass 10 pipes in one game",
+                            "Intermediate Pilot": "Pass 50 pipes in one game",
+                            "Expert Aviator":  "Pass 100 pipes in one game",
+                            "High Flyer": "Achieve a score of 200 or more"}
 
     def achievements_screen(self, title):
 
@@ -672,8 +685,9 @@ class Achievements():
             elif self.current_page != "Basic achievements":
                 left_arrow = draw_button(self.screen, self.arrow_left, self.button_font, 10, 440, 50, 50, (100, 100, 100), (200, 200, 200))
 
-            draw_rect(self.screen, title_x - 25, title_y + 50, 300, 400, (0, 0, 0), 5, 4)
-            draw_rect(self.screen, title_x - 20, title_y + 55, 290, 390, (145, 165, 16), 0, 0)
+            draw_rect(self.screen, 125 - 25, title_y + 50, 300, 400, (0, 0, 0), 5, 4)
+            draw_rect(self.screen, 125 - 20, title_y + 55, 290, 390, (145, 165, 16), 0, 0)
+            add_achievements_text(self.screen, self.achievement_description, self.achievement_title, self.achievements_dict, self.star)
             right_arrow = draw_button(self.screen, self.arrow_right, self.button_font, 420, 440, 50, 50, (100, 100, 100), (200, 200, 200))
             
             pygame.display.flip()
@@ -687,10 +701,12 @@ class Achievements():
                 if right_arrow:
                     self.page_num += 1
                     self.determine_page_title()
+                    self.get_achievements()
                     self.achievements_screen(self.current_page)
                 if left_arrow:
                     self.page_num -= 1
                     self.determine_page_title()
+                    self.get_achievements()
                     self.achievements_screen(self.current_page)
 
     def determine_page_title(self):
@@ -699,3 +715,20 @@ class Achievements():
         for key, value in page_dict.items():
             if key == self.page_num:
                 self.current_page = value
+
+    def get_achievements(self):
+        achievements_dict = {"Basic achievements": {"First Flight": "Successfully pass the first pipe",
+                            "Novice Flyer": "Pass 10 pipes in one game",
+                            "Intermediate Pilot": "Pass 50 pipes in one game",
+                            "Expert Aviator":  "Pass 100 pipes in one game",
+                            "High Flyer": "Achieve a score of 200 or more"},
+                            "Milestone achievements": {
+                            "Persistence Pays": "Play 100 games.",
+                            "Dedicated Player": "Play 500 games.",
+                            "True Fan": "Play 1,000 games.",
+                            "Marathon Runner": "Fly for a total of 10,000 pipes across all games."
+                        }
+                        }                
+        for key, value in achievements_dict.items():
+            if key == self.current_page:
+                self.achievements_dict = value

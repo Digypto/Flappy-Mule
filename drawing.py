@@ -88,3 +88,21 @@ def draw_button(screen: pygame.surface.Surface, text: str, font: pygame.font.Fon
 def draw_rect(screen: pygame.surface.Surface, x, y, width, height, color: tuple, border_radius: int, rounded: int):
     rect = pygame.Rect(x, y, width, height)
     pygame.draw.rect(screen, color, rect, border_radius, rounded)
+
+def add_achievements_text(screen: pygame.surface.Surface, font_description: pygame.font.Font, font_title: pygame.font.Font, achievements_dict: dict, star: pygame.image):
+    x_val = 150
+    y_val = 100
+    for key, value in achievements_dict.items():
+        screen.blit(star, (x_val - 40, y_val))
+        screen.blit(font_title.render(key, True, (255, 255, 255)), (x_val, y_val))
+        y_val += 25
+        screen.blit(font_description.render(value, True, (255, 255, 255)), (x_val, y_val))
+        y_val += 15
+        pygame.draw.rect(screen, (0,0,0), (x_val, y_val, 200, 25))
+        fill_width = (62 / 500) * 100
+        pygame.draw.rect(screen, (0,0,255), (x_val, y_val, fill_width, 25))
+        progress_text = f"{62}/{500}"
+        text_surface = font_description.render(progress_text, True, WHITE)
+        text_rect = text_surface.get_rect(center=(x_val + 200 // 2, y_val + 25 // 2))
+        screen.blit(text_surface, text_rect)
+        y_val += 35
