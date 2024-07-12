@@ -68,13 +68,41 @@ def draw_button(screen: pygame.surface.Surface, text: str, font: pygame.font.Fon
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
 
+    rect = pygame.Rect(x, y, width, height)
+
     if x < mouse[0] < x + width and y < mouse[1] < y + height:
-        pygame.draw.rect(screen, active_color, (x, y, width, height))
+        pygame.draw.rect(screen, active_color, rect)
         if click[0] == 1:
             return True
     else:
-        pygame.draw.rect(screen, inactive_color, (x, y, width, height))
+        pygame.draw.rect(screen, inactive_color, rect)
 
-    button_text = font.render(text, True, WHITE)
-    screen.blit(button_text, (x + (width - button_text.get_width()) // 2, y + (height - button_text.get_height()) // 2))
+    try:
+        button_text = font.render(text, True, WHITE)
+        screen.blit(button_text, (x + (width - button_text.get_width()) // 2, y + (height - button_text.get_height()) // 2))
+    except TypeError:
+        screen.blit(text, text.get_rect(center = rect.center))
     return False
+
+
+def draw_rect(screen: pygame.surface.Surface, x, y, width, height, color: tuple, border_radius: int, rounded: int):
+    rect = pygame.Rect(x, y, width, height)
+    pygame.draw.rect(screen, color, rect, border_radius, rounded)
+
+def add_achievements_text(screen: pygame.surface.Surface, font_description: pygame.font.Font, font_title: pygame.font.Font, achievements_dict: dict, star: pygame.image):
+    x_val = 150
+    y_val = 100
+    for key, value in achievements_dict.items():
+        screen.blit(star, (x_val - 40, y_val))
+        screen.blit(font_title.render(key, True, (255, 255, 255)), (x_val, y_val))
+        y_val += 25
+        screen.blit(font_description.render(value, True, (255, 255, 255)), (x_val, y_val))
+        y_val += 15
+        pygame.draw.rect(screen, (0,0,0), (x_val, y_val, 200, 25))
+        fill_width = (62 / 500) * 100
+        pygame.draw.rect(screen, (0,0,255), (x_val, y_val, fill_width, 25))
+        progress_text = f"{62}/{500}"
+        text_surface = font_description.render(progress_text, True, WHITE)
+        text_rect = text_surface.get_rect(center=(x_val + 200 // 2, y_val + 25 // 2))
+        screen.blit(text_surface, text_rect)
+        y_val += 35
