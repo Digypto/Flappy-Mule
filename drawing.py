@@ -68,13 +68,18 @@ def draw_button(screen: pygame.surface.Surface, text: str, font: pygame.font.Fon
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
 
+    rect = pygame.Rect(x, y, width, height)
+
     if x < mouse[0] < x + width and y < mouse[1] < y + height:
-        pygame.draw.rect(screen, active_color, (x, y, width, height))
+        pygame.draw.rect(screen, active_color, rect)
         if click[0] == 1:
             return True
     else:
-        pygame.draw.rect(screen, inactive_color, (x, y, width, height))
+        pygame.draw.rect(screen, inactive_color, rect)
 
-    button_text = font.render(text, True, WHITE)
-    screen.blit(button_text, (x + (width - button_text.get_width()) // 2, y + (height - button_text.get_height()) // 2))
+    try:
+        button_text = font.render(text, True, WHITE)
+        screen.blit(button_text, (x + (width - button_text.get_width()) // 2, y + (height - button_text.get_height()) // 2))
+    except TypeError:
+        screen.blit(text, text.get_rect(center = rect.center))
     return False

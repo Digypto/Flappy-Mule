@@ -7,7 +7,7 @@ from db.db_operations import save_score, get_high_scores, get_worst_score_in_db,
 from db.db_connection import get_db_connection
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
 from drawing import draw_text_with_outline, draw_button
-from utils import validate_sign_in, validate_registration
+from utils import validate_sign_in, validate_registration, crop_image
 from data_processing import database_to_dataframe
 
 from player import Player
@@ -29,7 +29,7 @@ class ScreenManager:
         self.font_path = font_path
         self.player = Player()
         self.load_fonts()
-        self.achievements = Achievements(screen, self, self.font_path, self.title_font, self.button_font)
+        self.achievements = Achievements(screen, self, self.font_path, self.leaderboard_font, self.button_font)
 
     def load_fonts(self):
         self.base_font = pygame.font.Font(self.font_path, 32)
@@ -642,8 +642,14 @@ class Achievements():
         self.title_font = title_font
         self.button_font = button_font
         self.screen_manager = screen_manager
-        self.arrow_right = pygame.image.load('right_arrow_transparent.png').convert_alpha()
-        self.arrow_left = pygame.image.load('left_arrow_transparent.png').convert_alpha()
+        self.arrow_right = pygame.image.load(f'{os.getcwd()}/assets/right_arrow_transparent.png').convert_alpha()
+        self.arrow_right = pygame.transform.scale(self.arrow_right, (50, 50))
+        self.arrow_right = crop_image(self.arrow_right)
+        self.arrow_left = pygame.image.load(f'{os.getcwd()}/assets/left_arrow_transparent.png').convert_alpha()
+        self.arrow_left = pygame.transform.scale(self.arrow_left, (50, 50))
+        self.arrow_left = crop_image(self.arrow_left)
+        self.page_num = 1
+        self.current_page = "Basic achievements"
 
     def achievements_screen(self, title):
 
@@ -655,13 +661,18 @@ class Achievements():
             title_x = WIDTH // 2 - self.title_font.size(achievements_title)[0] // 2
             title_y = HEIGHT // 20
             draw_text_with_outline(self.screen, achievements_title, self.title_font, title_x, title_y)
+            back = None
+            left_arrow = None
 
-            back_button_x = WIDTH // 2 - 100
-            back_button_y = HEIGHT - 100
-            back_button_width = 200
-            back_button_height = 70
-            back = draw_button(self.screen, "Back", self.button_font, back_button_x, back_button_y, back_button_width, back_button_height, (0, 0, 0), (200, 200, 200))
+            if self.current_page == "Basic achievements":
+                back_button_width = 100
+                back_button_height = 70
+                back = draw_button(self.screen, "Back", self.button_font, 10, 10, back_button_width, back_button_height, (0, 0, 0), (200, 200, 200))
 
+            elif self.current_page != "Basic achievements":
+                left_arrow = draw_button(self.screen, self.arrow_left, self.button_font, 10, 440, 50, 50, (100, 100, 100), (200, 200, 200))
+
+            right_arrow = draw_button(self.screen, self.arrow_right, self.button_font, 420, 440, 50, 50, (100, 100, 100), (200, 200, 200))
             pygame.display.flip()
 
             for event in pygame.event.get():
@@ -670,3 +681,18 @@ class Achievements():
                     exit()
                 if back:
                     self.screen_manager.main_menu()
+                if right_arrow:
+                    self.page_num += 1
+                    self.determine_page_title()
+                    self.achievements_screen(self.current_page)
+                if left_arrow:
+                    self.page_num -= 1
+                    self.determine_page_title()
+                    self.achievements_screen(self.current_page)
+
+    def determine_page_title(self):
+        page_dict = {1: "Basic achievements", 2: "Milestone achievements", 3: "Skill-based achievements"}
+
+        for key, value in page_dict.items():
+            if key == self.page_num:
+                self.current_page = value
