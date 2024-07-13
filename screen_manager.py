@@ -8,7 +8,7 @@ from db.db_connection import get_db_connection
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
 from drawing import draw_text_with_outline, draw_button, draw_rect, add_achievements_text
 from utils import validate_sign_in, validate_registration, crop_image
-from data_processing import database_to_dataframe
+from data_processing import database_to_dataframe, achievement_progress_to_dict
 
 from player import Player
 from game_objects import Mule, all_sprites, pipes, coins, powerups, last_pipe_time, PIPE_INTERVAL, create_coin, create_pipe, create_powerup
@@ -365,6 +365,7 @@ class ScreenManager:
                             subprocess.call("osascript -e '{}'".format(applescript), shell=True) 
                         self.player = validation[2]
                         insert_achievements(client, self.player.get_name())
+                        self.achievements = Achievements(self.screen, self, self.font_path, self.leaderboard_font, self.button_font, self.achievement_description, self.achievement_title)
                         self.main_menu()
                     if not validation_bool:
                         try:
@@ -486,7 +487,7 @@ class ScreenManager:
                     validation_bool = validate_sign_in(username_text, password_text)
                     if validation_bool[0]:
                         self.player = validation_bool[1]
-                        update_user_latest_sign_in(client, "jee")
+                        self.achievements = Achievements(self.screen, self, self.font_path, self.leaderboard_font, self.button_font, self.achievement_description, self.achievement_title)
                         self.main_menu()
                     if not validation_bool[0]:
                         try:
@@ -665,6 +666,8 @@ class Achievements():
                             "Expert Aviator":  {"description": "Achieve a score of 100 or more in one game", "target": 100},
                             "High Flyer": {"description": "Achieve a score of 200 or more in one game", "target": 200}}
 
+        self.achievement_progress_dict = achievement_progress_to_dict(self.screen_manager.player, self.current_page)
+
     def achievements_screen(self, title):
 
         running = True
@@ -688,7 +691,7 @@ class Achievements():
 
             draw_rect(self.screen, 125 - 25, title_y + 50, 300, 400, (0, 0, 0), 5, 4)
             draw_rect(self.screen, 125 - 20, title_y + 55, 290, 390, (145, 165, 16), 0, 0)
-            add_achievements_text(self.screen, self.achievement_description, self.achievement_title, self.achievements_dict, self.star)
+            add_achievements_text(self.screen, self.achievement_description, self.achievement_title, self.achievements_dict, self.achievement_progress_dict, self.star)
             right_arrow = draw_button(self.screen, self.arrow_right, self.button_font, 420, 440, 50, 50, (100, 100, 100), (200, 200, 200))
             
             pygame.display.flip()
@@ -703,11 +706,13 @@ class Achievements():
                     self.page_num += 1
                     self.determine_page_title()
                     self.get_achievements()
+                    self.update_achievement_progress_dict()
                     self.achievements_screen(self.current_page)
                 if left_arrow:
                     self.page_num -= 1
                     self.determine_page_title()
                     self.get_achievements()
+                    self.update_achievement_progress_dict()
                     self.achievements_screen(self.current_page)
 
     def determine_page_title(self):
@@ -724,12 +729,16 @@ class Achievements():
                             "Expert Aviator":  {"description": "Achieve a score of 100 or more in one game", "target": 100},
                             "High Flyer": {"description": "Achieve a score of 200 or more in one game", "target": 200}},
                             "Milestone achievements": {
-                            "Persistence Pays": {"description": "Play 100 games.", "target": 100},
-                            "Dedicated Player": {"description": "Play 500 games.", "target": 500},
-                            "True Fan": {"description": "Play 1000 games.", "target": 1000},
-                            "Marathon Runner": {"description": "Achieve a score of 10 000 points across all games.", "target": 10000}
+                            "Persistence Pays": {"description": "Play 100 games", "target": 100},
+                            "Dedicated Player": {"description": "Play 500 games", "target": 500},
+                            "True Fan": {"description": "Play 1000 games", "target": 1000},
+                            "Marathon Runner": {"description": "Achieve a score of 10 000 points across all games", "target": 10000}
                         }
                         }                
         for key, value in achievements_dict.items():
             if key == self.current_page:
                 self.achievements_dict = value
+
+    def update_achievement_progress_dict(self):
+        self.achievement_progress_dict = achievement_progress_to_dict(self.screen_manager.player, self.current_page)
+

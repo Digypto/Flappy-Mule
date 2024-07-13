@@ -1,5 +1,6 @@
 import pygame
 from pygame.locals import *
+from data_processing import achievement_progress_to_dict
 
 
 WHITE = (255, 255, 255)
@@ -89,14 +90,32 @@ def draw_rect(screen: pygame.surface.Surface, x, y, width, height, color: tuple,
     rect = pygame.Rect(x, y, width, height)
     pygame.draw.rect(screen, color, rect, border_radius, rounded)
 
-def add_achievements_text(screen: pygame.surface.Surface, font_description: pygame.font.Font, font_title: pygame.font.Font, achievements_dict: dict, star: pygame.image):
+def add_achievements_text(screen: pygame.surface.Surface, font_description: pygame.font.Font, font_title: pygame.font.Font, achievements_dict: dict, achievement_progress_dict: dict, star: pygame.image):
     x_val = 150
     y_val = 100
-    for key, value in achievements_dict.items():
+    try:
+        for key, value in achievement_progress_dict.items():
+            for val in value:
+                screen.blit(star, (x_val - 40, y_val))
+                screen.blit(font_title.render(val.get("title"), True, (255, 255, 255)), (x_val, y_val))
+                y_val += 25
+                screen.blit(font_description.render(val.get("description"), True, (255, 255, 255)), (x_val, y_val))
+                y_val += 15
+                pygame.draw.rect(screen, (0,0,0), (x_val, y_val, 200, 25))
+                fill_width = (val.get("progress") / val.get("target")) * 100
+                pygame.draw.rect(screen, (0,0,255), (x_val, y_val, fill_width, 25))
+                progress_text = f"{val.get('progress')}/{val.get('target')}"
+                text_surface = font_description.render(progress_text, True, WHITE)
+                text_rect = text_surface.get_rect(center=(x_val + 200 // 2, y_val + 25 // 2))
+                screen.blit(text_surface, text_rect)
+                y_val += 35
+    except Exception as e:
+        pass
+"""     for key, value in achievements_dict.items():
         screen.blit(star, (x_val - 40, y_val))
         screen.blit(font_title.render(key, True, (255, 255, 255)), (x_val, y_val))
         y_val += 25
-        screen.blit(font_description.render(value.get("desc"), True, (255, 255, 255)), (x_val, y_val))
+        screen.blit(font_description.render(value.get("description"), True, (255, 255, 255)), (x_val, y_val))
         y_val += 15
         pygame.draw.rect(screen, (0,0,0), (x_val, y_val, 200, 25))
         fill_width = (0 / value.get("target")) * 100
@@ -105,4 +124,4 @@ def add_achievements_text(screen: pygame.surface.Surface, font_description: pyga
         text_surface = font_description.render(progress_text, True, WHITE)
         text_rect = text_surface.get_rect(center=(x_val + 200 // 2, y_val + 25 // 2))
         screen.blit(text_surface, text_rect)
-        y_val += 35
+        y_val += 35 """

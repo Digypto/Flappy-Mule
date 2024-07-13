@@ -20,3 +20,19 @@ def database_to_dataframe(collection: str) -> pd.DataFrame:
 
 
     return df
+
+def achievement_progress_to_dict(player, header: str) -> dict:
+    try:
+        df = database_to_dataframe("achievements")
+        df = df.loc[df["user"] == player.get_name()]
+        if df.empty:
+            return {"text": [{"title": "Sign in to see achievements"}]}
+        df_dict = df.to_dict()
+        achievements_dict = {}
+        if header == "Basic achievements":
+            achievements_dict["Basic achievements"] = df_dict.get("Basic achievements")[0]
+        if header == "Milestone achievements":
+            achievements_dict["Milestone achievements"] = df_dict.get("Milestone achievements")[0]
+        return achievements_dict
+    except Exception as e:
+        pass

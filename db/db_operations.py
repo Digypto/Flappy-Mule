@@ -101,30 +101,33 @@ def get_users(client: MongoClient):
 
 def insert_achievements(client: MongoClient, username: str):
      achievements_col = check_and_create_collection(client, "FlappyMuleAchievements")
-     data = {"user": username, "first_flight_completed": False, "first_flight_completion_date": None,
-            "novice_flyer_completed": False, "novice_flyer_progress": 0, "novice_flyer_completion_date": None,
-            "intermediate_pilot_completed": False, "intermediate_pilot_progress": 0, "intermediate_pilot_completion_date": None,
-            "expert_aviator_completed": False, "expert_aviator_progress": 0, "expert_aviator_completion_date": None,
-            "high_flyer_completed": False, "high_flyer_progress": 0, "high_flyer_completion_date": None,
-            "persistence_pays_completed": False, "persistence_pays_progress": 0, "persistence_pays_completion_date": None,
-            "dedicated_player_completed": False, "dedicated_player_progress": 0, "dedicated_player_completion_date": None,
-            "true_fan_completetd": False, "true_fan_progress": 0, "true_fan_completion_date": None,
-            "marathon_runner_completed": False, "marathon_runner_progress": 0, "marathon_runner_completion_date": None
-            }
+     data = {"user": username, "Basic achievements": [
+        {"title": "First Flight", "description": "Achieve a score of 1 or more in one game", "target": 1, "progress": 0, "completed": False},
+        {"title": "Novice Flyer", "description": "Achieve a score of 10 or more in one game", "target": 10, "progress": 0, "completed": False},
+        {"title": "Intermediate Pilot", "description": "Achieve a score of 50 or more in one game", "target": 50, "progress": 0, "completed": False},
+        {"title": "Expert Aviator", "description": "Achieve a score of 100 or more in one game", "target": 100, "progress": 0, "completed": False},
+        {"title": "High Flyer", "description": "Achieve a score of 200 or more in one game", "target": 200, "progress": 0, "completed": False}],
+        "Milestone achievements": [
+        {"title": "Persistence Pays", "description": "Play 100 games", "target": 100, "progress": 0, "completed": False},
+        {"title": "Dedicated Player", "description": "Play 500 games", "target": 500, "progress": 0, "completed": False},
+        {"title": "True Fan", "description": "Play 1000 games", "target": 1000, "progress": 0, "completed": False},
+        {"title": "Marathon Runner", "description": "Achieve a score of 10 000 points across all games", "target": 10000, "progress": 0, "completed": False}
+    ]}
      achievements_col.insert_one(data)
 
 def update_achievements(client: MongoClient, username: str):
      achievements_col = check_and_create_collection(client, "FlappyMuleAchievements")
-     data = {"user": username, "first_flight_completed": False, "first_flight_completion_date": None,
-            "novice_flyer_completed": False, "novice_flyer_progress": 0, "novice_flyer_completion_date": None,
-            "intermediate_pilot_completed": False, "intermediate_pilot_progress": 0, "intermediate_pilot_completion_date": None,
-            "expert_aviator_completed": False, "expert_aviator_progress": 0, "expert_aviator_completion_date": None,
-            "high_flyer_completed": False, "high_flyer_progress": 0, "high_flyer_completion_date": None,
-            "persistence_pays_completed": False, "persistence_pays_progress": 0, "persistence_pays_completion_date": None,
-            "dedicated_player_completed": False, "dedicated_player_progress": 0, "dedicated_player_completion_date": None,
-            "true_fan_completetd": False, "true_fan_progress": 0, "true_fan_completion_date": None,
-            "marathon_runner_completed": False, "marathon_runner_progress": 0, "marathon_runner_completion_date": None
-            }
+     data = {"user": username,     "achievements": [
+        {"title": "First Flight", "description": "Achieve a score of 1 or more in one game", "target": 1, "progress": 0, "completed": False},
+        {"title": "Novice Flyer", "description": "Achieve a score of 10 or more in one game", "target": 10, "progress": 0, "completed": False},
+        {"title": "Intermediate Pilot", "description": "Achieve a score of 50 or more in one game", "target": 50, "progress": 0, "completed": False},
+        {"title": "Expert Aviator", "description": "Achieve a score of 100 or more in one game", "target": 100, "progress": 0, "completed": False},
+        {"title": "High Flyer", "description": "Achieve a score of 200 or more in one game", "target": 200, "progress": 0, "completed": False},
+        {"title": "Persistence Pays", "description": "Play 100 games", "target": 100, "progress": 0, "completed": False},
+        {"title": "Dedicated Player", "description": "Play 500 games", "target": 500, "progress": 0, "completed": False},
+        {"title": "True Fan", "description": "Play 1000 games", "target": 1000, "progress": 0, "completed": False},
+        {"title": "Marathon Runner", "description": "Achieve a score of 10 000 points across all games", "target": 10000, "progress": 0, "completed": False}
+    ]}
      achievements_col.insert_one(data)
 
 def check_and_create_collection(client: MongoClient, col_name):
