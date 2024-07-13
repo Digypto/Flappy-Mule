@@ -101,13 +101,16 @@ def add_achievements_text(screen: pygame.surface.Surface, font_description: pyga
                 y_val += 25
                 screen.blit(font_description.render(val.get("description"), True, (255, 255, 255)), (x_val, y_val))
                 y_val += 15
-                pygame.draw.rect(screen, (0,0,0), (x_val, y_val, 200, 25))
-                fill_width = (val.get("progress") / val.get("target")) * 100
-                pygame.draw.rect(screen, (0,0,255), (x_val, y_val, fill_width, 25))
-                progress_text = f"{val.get('progress')}/{val.get('target')}"
-                text_surface = font_description.render(progress_text, True, WHITE)
-                text_rect = text_surface.get_rect(center=(x_val + 200 // 2, y_val + 25 // 2))
-                screen.blit(text_surface, text_rect)
+                if val.get("completed"):
+                    screen.blit(font_title.render(f'Completed on {val.get("completion_date")}', True, (255, 255, 255)), (x_val, y_val))
+                if not val.get("completed"):
+                    pygame.draw.rect(screen, (0,0,0), (x_val, y_val, 200, 25))
+                    fill_width = (val.get("progress") / val.get("target")) * 100
+                    pygame.draw.rect(screen, (0,0,255), (x_val, y_val, fill_width, 25))
+                    progress_text = f"{val.get('progress')}/{val.get('target')}"
+                    text_surface = font_description.render(progress_text, True, WHITE)
+                    text_rect = text_surface.get_rect(center=(x_val + 200 // 2, y_val + 25 // 2))
+                    screen.blit(text_surface, text_rect)
                 y_val += 35
     except Exception as e:
         pass
