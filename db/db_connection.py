@@ -32,7 +32,7 @@ def get_db_connection() -> MongoClient:
     appname = credential_dict.get("appname")
     try:
         conn_str = f"mongodb+srv://{user}:{password}@{host}/?retryWrites=true&w=majority&appName={appname}"
-        client = MongoClient(conn_str)
+        client = MongoClient(conn_str, tlsAllowInvalidCertificates=True)
         return client
     except Exception as e:
         print(f"Error connecting to MongoDB: {e}")

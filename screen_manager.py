@@ -3,7 +3,7 @@ import os
 import ctypes
 import subprocess
 
-from db.db_operations import save_score, get_high_scores, get_worst_score_in_db, update_user_lifetime_score, update_user_latest_sign_in, insert_achievements
+from db.db_operations import save_score, get_high_scores, get_worst_score_in_db, update_user_lifetime_score, update_user_latest_sign_in, insert_achievements, update_achievements
 from db.db_connection import get_db_connection
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
 from drawing import draw_text_with_outline, draw_button, draw_rect, add_achievements_text
@@ -584,6 +584,7 @@ class ScreenManager:
             if pipe_collision and not collision_handled:
                 play_collision_sound()
                 if player.lives == 0:
+                    update_achievements(client, self.player.get_name(), self.player.get_score())
                     running = False
                 else:
                     player.remove_life()
@@ -622,7 +623,7 @@ class ScreenManager:
         if player.points > get_worst_score_in_db(client)[0] or get_worst_score_in_db(client)[1] < 5: #check if there are under 5 entries in db or the user is better than the worst score in db
             if self.player.get_name():
                 save_score(client, player.points, player.name)
-                update_user_lifetime_score(client, self.player.name, self.player.points)
+                #update_user_lifetime_score(client, self.player.name, self.player.points)
                 try:
                     ctypes.windll.user32.MessageBoxW(0, "Your score was saved on the leaderboard", "Popup", 0)
                 except AttributeError:
