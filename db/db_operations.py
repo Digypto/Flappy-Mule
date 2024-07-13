@@ -1,4 +1,3 @@
-from db.db_connection import retrieve_db_credentials
 from pymongo import MongoClient
 import pymongo
 from datetime import datetime
@@ -38,7 +37,7 @@ def get_high_scores(client: MongoClient) -> list:
     client : pymongo.MongoClient
         MongoDB client object.
     limit : int, optional
-        The number of high scores to retrieve (default is 10).
+        The number of high scores to retrieve (default is 5).
 
     Returns
     -------
@@ -76,9 +75,9 @@ def save_user(client: MongoClient, username: str, password: str):
 
 def update_user_lifetime_score(client: MongoClient, username: str, score: int):
         try:
-            users_col = check_and_create_collection(client, "FlappyMuleUsers")
+            achievements_col = check_and_create_collection(client, "FlappyMuleAchievements")
             #data = {{"user": username}, {"$set":{"score": score}}}
-            users_col.find_one_and_update({"user": username}, {"$inc":{"score": score}})
+            achievements_col.find_one_and_update({"user": username}, {"$inc":{"marathon_runner_progress": score}})
             #users_col.update_many({"score": {"$exists": False}}, {"$set": {"score": score}})
         except Exception as e:
             print(f"Error saving score: {e}")
@@ -99,6 +98,37 @@ def get_users(client: MongoClient):
             return users_col
         except Exception as e:
             print(f"Error retrieving users: {e}")
+
+def insert_achievements(client: MongoClient, username: str):
+     achievements_col = check_and_create_collection(client, "FlappyMuleAchievements")
+     data = {"user": username, "Basic achievements": [
+        {"title": "First Flight", "description": "Achieve a score of 1 or more in one game", "target": 1, "progress": 0, "completed": False},
+        {"title": "Novice Flyer", "description": "Achieve a score of 10 or more in one game", "target": 10, "progress": 0, "completed": False},
+        {"title": "Intermediate Pilot", "description": "Achieve a score of 50 or more in one game", "target": 50, "progress": 0, "completed": False},
+        {"title": "Expert Aviator", "description": "Achieve a score of 100 or more in one game", "target": 100, "progress": 0, "completed": False},
+        {"title": "High Flyer", "description": "Achieve a score of 200 or more in one game", "target": 200, "progress": 0, "completed": False}],
+        "Milestone achievements": [
+        {"title": "Persistence Pays", "description": "Play 100 games", "target": 100, "progress": 0, "completed": False},
+        {"title": "Dedicated Player", "description": "Play 500 games", "target": 500, "progress": 0, "completed": False},
+        {"title": "True Fan", "description": "Play 1000 games", "target": 1000, "progress": 0, "completed": False},
+        {"title": "Marathon Runner", "description": "Achieve a score of 10 000 points across all games", "target": 10000, "progress": 0, "completed": False}
+    ]}
+     achievements_col.insert_one(data)
+
+def update_achievements(client: MongoClient, username: str):
+     achievements_col = check_and_create_collection(client, "FlappyMuleAchievements")
+     data = {"user": username,     "achievements": [
+        {"title": "First Flight", "description": "Achieve a score of 1 or more in one game", "target": 1, "progress": 0, "completed": False},
+        {"title": "Novice Flyer", "description": "Achieve a score of 10 or more in one game", "target": 10, "progress": 0, "completed": False},
+        {"title": "Intermediate Pilot", "description": "Achieve a score of 50 or more in one game", "target": 50, "progress": 0, "completed": False},
+        {"title": "Expert Aviator", "description": "Achieve a score of 100 or more in one game", "target": 100, "progress": 0, "completed": False},
+        {"title": "High Flyer", "description": "Achieve a score of 200 or more in one game", "target": 200, "progress": 0, "completed": False},
+        {"title": "Persistence Pays", "description": "Play 100 games", "target": 100, "progress": 0, "completed": False},
+        {"title": "Dedicated Player", "description": "Play 500 games", "target": 500, "progress": 0, "completed": False},
+        {"title": "True Fan", "description": "Play 1000 games", "target": 1000, "progress": 0, "completed": False},
+        {"title": "Marathon Runner", "description": "Achieve a score of 10 000 points across all games", "target": 10000, "progress": 0, "completed": False}
+    ]}
+     achievements_col.insert_one(data)
 
 def check_and_create_collection(client: MongoClient, col_name):
         mydb = client["FlappyMule"]
