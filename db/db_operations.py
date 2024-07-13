@@ -1,4 +1,3 @@
-from db.db_connection import retrieve_db_credentials
 from pymongo import MongoClient
 import pymongo
 from datetime import datetime
@@ -38,7 +37,7 @@ def get_high_scores(client: MongoClient) -> list:
     client : pymongo.MongoClient
         MongoDB client object.
     limit : int, optional
-        The number of high scores to retrieve (default is 10).
+        The number of high scores to retrieve (default is 5).
 
     Returns
     -------
@@ -76,9 +75,9 @@ def save_user(client: MongoClient, username: str, password: str):
 
 def update_user_lifetime_score(client: MongoClient, username: str, score: int):
         try:
-            users_col = check_and_create_collection(client, "FlappyMuleUsers")
+            achievements_col = check_and_create_collection(client, "FlappyMuleAchievements")
             #data = {{"user": username}, {"$set":{"score": score}}}
-            users_col.find_one_and_update({"user": username}, {"$inc":{"score": score}})
+            achievements_col.find_one_and_update({"user": username}, {"$inc":{"marathon_runner_progress": score}})
             #users_col.update_many({"score": {"$exists": False}}, {"$set": {"score": score}})
         except Exception as e:
             print(f"Error saving score: {e}")
@@ -99,6 +98,34 @@ def get_users(client: MongoClient):
             return users_col
         except Exception as e:
             print(f"Error retrieving users: {e}")
+
+def insert_achievements(client: MongoClient, username: str):
+     achievements_col = check_and_create_collection(client, "FlappyMuleAchievements")
+     data = {"user": username, "first_flight_completed": False, "first_flight_completion_date": None,
+            "novice_flyer_completed": False, "novice_flyer_progress": 0, "novice_flyer_completion_date": None,
+            "intermediate_pilot_completed": False, "intermediate_pilot_progress": 0, "intermediate_pilot_completion_date": None,
+            "expert_aviator_completed": False, "expert_aviator_progress": 0, "expert_aviator_completion_date": None,
+            "high_flyer_completed": False, "high_flyer_progress": 0, "high_flyer_completion_date": None,
+            "persistence_pays_completed": False, "persistence_pays_progress": 0, "persistence_pays_completion_date": None,
+            "dedicated_player_completed": False, "dedicated_player_progress": 0, "dedicated_player_completion_date": None,
+            "true_fan_completetd": False, "true_fan_progress": 0, "true_fan_completion_date": None,
+            "marathon_runner_completed": False, "marathon_runner_progress": 0, "marathon_runner_completion_date": None
+            }
+     achievements_col.insert_one(data)
+
+def update_achievements(client: MongoClient, username: str):
+     achievements_col = check_and_create_collection(client, "FlappyMuleAchievements")
+     data = {"user": username, "first_flight_completed": False, "first_flight_completion_date": None,
+            "novice_flyer_completed": False, "novice_flyer_progress": 0, "novice_flyer_completion_date": None,
+            "intermediate_pilot_completed": False, "intermediate_pilot_progress": 0, "intermediate_pilot_completion_date": None,
+            "expert_aviator_completed": False, "expert_aviator_progress": 0, "expert_aviator_completion_date": None,
+            "high_flyer_completed": False, "high_flyer_progress": 0, "high_flyer_completion_date": None,
+            "persistence_pays_completed": False, "persistence_pays_progress": 0, "persistence_pays_completion_date": None,
+            "dedicated_player_completed": False, "dedicated_player_progress": 0, "dedicated_player_completion_date": None,
+            "true_fan_completetd": False, "true_fan_progress": 0, "true_fan_completion_date": None,
+            "marathon_runner_completed": False, "marathon_runner_progress": 0, "marathon_runner_completion_date": None
+            }
+     achievements_col.insert_one(data)
 
 def check_and_create_collection(client: MongoClient, col_name):
         mydb = client["FlappyMule"]

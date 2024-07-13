@@ -3,7 +3,7 @@ import os
 import ctypes
 import subprocess
 
-from db.db_operations import save_score, get_high_scores, get_worst_score_in_db, update_user_lifetime_score, update_user_latest_sign_in
+from db.db_operations import save_score, get_high_scores, get_worst_score_in_db, update_user_lifetime_score, update_user_latest_sign_in, insert_achievements
 from db.db_connection import get_db_connection
 from sound_manager import play_coin_collision_sound, play_collision_sound, play_powerup_collision_sound
 from drawing import draw_text_with_outline, draw_button, draw_rect, add_achievements_text
@@ -364,6 +364,7 @@ class ScreenManager:
                                 """
                             subprocess.call("osascript -e '{}'".format(applescript), shell=True) 
                         self.player = validation[2]
+                        insert_achievements(client, self.player.get_name())
                         self.main_menu()
                     if not validation_bool:
                         try:
@@ -658,11 +659,11 @@ class Achievements():
         self.arrow_left = crop_image(self.arrow_left)
         self.page_num = 1
         self.current_page = "Basic achievements"
-        self.achievements_dict = {"First Flight": "Successfully pass the first pipe",
-                            "Novice Flyer": "Pass 10 pipes in one game",
-                            "Intermediate Pilot": "Pass 50 pipes in one game",
-                            "Expert Aviator":  "Pass 100 pipes in one game",
-                            "High Flyer": "Achieve a score of 200 or more"}
+        self.achievements_dict = {"First Flight": {"description": "Achieve a score of 1 or more in one game", "target": 1},
+                            "Novice Flyer": {"description": "Achieve a score of 10 or more one game", "target": 10},
+                            "Intermediate Pilot": {"description": "Achieve a score of 50 or more in one game", "target": 50},
+                            "Expert Aviator":  {"description": "Achieve a score of 100 or more in one game", "target": 100},
+                            "High Flyer": {"description": "Achieve a score of 200 or more in one game", "target": 200}}
 
     def achievements_screen(self, title):
 
@@ -717,16 +718,16 @@ class Achievements():
                 self.current_page = value
 
     def get_achievements(self):
-        achievements_dict = {"Basic achievements": {"First Flight": "Successfully pass the first pipe",
-                            "Novice Flyer": "Pass 10 pipes in one game",
-                            "Intermediate Pilot": "Pass 50 pipes in one game",
-                            "Expert Aviator":  "Pass 100 pipes in one game",
-                            "High Flyer": "Achieve a score of 200 or more"},
+        achievements_dict = {"Basic achievements": {"First Flight": {"description": "Achieve a score of 1 or more in one game", "target": 1},
+                            "Novice Flyer": {"description": "Achieve a score of 10 or more one game", "target": 10},
+                            "Intermediate Pilot": {"description": "Achieve a score of 50 or more in one game", "target": 50},
+                            "Expert Aviator":  {"description": "Achieve a score of 100 or more in one game", "target": 100},
+                            "High Flyer": {"description": "Achieve a score of 200 or more in one game", "target": 200}},
                             "Milestone achievements": {
-                            "Persistence Pays": "Play 100 games.",
-                            "Dedicated Player": "Play 500 games.",
-                            "True Fan": "Play 1,000 games.",
-                            "Marathon Runner": "Fly for a total of 10,000 pipes across all games."
+                            "Persistence Pays": {"description": "Play 100 games.", "target": 100},
+                            "Dedicated Player": {"description": "Play 500 games.", "target": 500},
+                            "True Fan": {"description": "Play 1000 games.", "target": 1000},
+                            "Marathon Runner": {"description": "Achieve a score of 10 000 points across all games.", "target": 10000}
                         }
                         }                
         for key, value in achievements_dict.items():

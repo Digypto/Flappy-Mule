@@ -96,12 +96,12 @@ def add_achievements_text(screen: pygame.surface.Surface, font_description: pyga
         screen.blit(star, (x_val - 40, y_val))
         screen.blit(font_title.render(key, True, (255, 255, 255)), (x_val, y_val))
         y_val += 25
-        screen.blit(font_description.render(value, True, (255, 255, 255)), (x_val, y_val))
+        screen.blit(font_description.render(value.get("desc"), True, (255, 255, 255)), (x_val, y_val))
         y_val += 15
         pygame.draw.rect(screen, (0,0,0), (x_val, y_val, 200, 25))
-        fill_width = (62 / 500) * 100
+        fill_width = (0 / value.get("target")) * 100
         pygame.draw.rect(screen, (0,0,255), (x_val, y_val, fill_width, 25))
-        progress_text = f"{62}/{500}"
+        progress_text = f"{0}/{value.get('target')}"
         text_surface = font_description.render(progress_text, True, WHITE)
         text_rect = text_surface.get_rect(center=(x_val + 200 // 2, y_val + 25 // 2))
         screen.blit(text_surface, text_rect)
