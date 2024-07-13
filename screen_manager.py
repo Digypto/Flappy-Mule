@@ -37,7 +37,7 @@ class ScreenManager:
         self.achievement_title = pygame.font.SysFont(self.font_path, 32, bold=True)
         self.achievement_description = pygame.font.SysFont(self.font_path, 16)
         self.register_font = pygame.font.SysFont(self.font_path, 16)
-        self.leaderboard_font = pygame.font.Font(self.font_path, 36)
+        self.leaderboard_font = pygame.font.Font(self.font_path, 48)
         self.congratulations_font = pygame.font.Font(self.font_path, 28)
         self.title_font = pygame.font.Font(self.font_path, 90)
         self.game_over_font = pygame.font.Font(self.font_path, 160)
@@ -61,13 +61,13 @@ class ScreenManager:
         draw_text_with_outline(self.screen, username_label, self.congratulations_font, username_x, username_y)
 
 
-        input_box_y = username_y + 50
-        input_rect = pygame.Rect(WIDTH // 2 - 175, input_box_y, 200, 50)
+        input_box_y = username_y + 50  # 90 pixels above the "Play Again" button
+        input_rect = pygame.Rect(WIDTH // 2 - 175, input_box_y, 350, 50)
 
-        no_button_x = WIDTH // 2 - 115
-        no_button_y = input_box_y + 75
+        no_button_x = WIDTH // 2 - 100  # Center horizontally
+        no_button_y = HEIGHT - 70  # 70 pixels from the bottom
         no_button_width = 200
-        no_button_height = 50
+        no_button_height = 60
 
         color_active = pygame.Color((200, 200, 200))
         color_passive = pygame.Color('black')
@@ -76,7 +76,15 @@ class ScreenManager:
         active = False
         user_text = ''
 
+        death_time = pygame.time.get_ticks()
+
+        button_x = WIDTH // 2 - 100  # Center horizontally
+        button_y = no_button_y - 70  # 90 pixels above the "No Thanks" button
+        button_width = 200
+        button_height = 60
+
         while True:
+            draw_button(self.screen, "Play Again", self.button_font, button_x, button_y, button_width, button_height, (0, 0, 0), (200, 200, 200))
             no_button = draw_button(self.screen, "No thanks", self.button_font, no_button_x, no_button_y, no_button_width, no_button_height, (0, 0, 0), (200, 200, 200))
             pygame.display.flip()
 
