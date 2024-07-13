@@ -102,33 +102,55 @@ def get_users(client: MongoClient):
 def insert_achievements(client: MongoClient, username: str):
      achievements_col = check_and_create_collection(client, "FlappyMuleAchievements")
      data = {"user": username, "Basic achievements": [
-        {"title": "First Flight", "description": "Achieve a score of 1 or more in one game", "target": 1, "progress": 0, "completed": False},
-        {"title": "Novice Flyer", "description": "Achieve a score of 10 or more in one game", "target": 10, "progress": 0, "completed": False},
-        {"title": "Intermediate Pilot", "description": "Achieve a score of 50 or more in one game", "target": 50, "progress": 0, "completed": False},
-        {"title": "Expert Aviator", "description": "Achieve a score of 100 or more in one game", "target": 100, "progress": 0, "completed": False},
-        {"title": "High Flyer", "description": "Achieve a score of 200 or more in one game", "target": 200, "progress": 0, "completed": False}],
+        {"title": "First Flight", "description": "Achieve a score of 1 or more in one game", "target": 1, "progress": 0, "completed": False, "completion_date": None},
+        {"title": "Novice Flyer", "description": "Achieve a score of 10 or more in one game", "target": 10, "progress": 0, "completed": False, "completion_date": None},
+        {"title": "Intermediate Pilot", "description": "Achieve a score of 50 or more in one game", "target": 50, "progress": 0, "completed": False, "completion_date": None},
+        {"title": "Expert Aviator", "description": "Achieve a score of 100 or more in one game", "target": 100, "progress": 0, "completed": False, "completion_date": None},
+        {"title": "High Flyer", "description": "Achieve a score of 200 or more in one game", "target": 200, "progress": 0, "completed": False, "completion_date": None}],
         "Milestone achievements": [
-        {"title": "Persistence Pays", "description": "Play 100 games", "target": 100, "progress": 0, "completed": False},
-        {"title": "Dedicated Player", "description": "Play 500 games", "target": 500, "progress": 0, "completed": False},
-        {"title": "True Fan", "description": "Play 1000 games", "target": 1000, "progress": 0, "completed": False},
-        {"title": "Marathon Runner", "description": "Achieve a score of 10 000 points across all games", "target": 10000, "progress": 0, "completed": False}
+        {"title": "Persistence Pays", "description": "Play 100 games", "target": 100, "progress": 0, "completed": False, "completion_date": None},
+        {"title": "Dedicated Player", "description": "Play 500 games", "target": 500, "progress": 0, "completed": False, "completion_date": None},
+        {"title": "True Fan", "description": "Play 1000 games", "target": 1000, "progress": 0, "completed": False, "completion_date": None},
+        {"title": "Marathon Runner", "description": "Achieve a score of 10 000 points across all games", "target": 10000, "progress": 0, "completed": False, "completion_date": None}
     ]}
      achievements_col.insert_one(data)
 
-def update_achievements(client: MongoClient, username: str):
+def update_achievements(client: MongoClient, username: str, score: int):
      achievements_col = check_and_create_collection(client, "FlappyMuleAchievements")
-     data = {"user": username,     "achievements": [
-        {"title": "First Flight", "description": "Achieve a score of 1 or more in one game", "target": 1, "progress": 0, "completed": False},
-        {"title": "Novice Flyer", "description": "Achieve a score of 10 or more in one game", "target": 10, "progress": 0, "completed": False},
-        {"title": "Intermediate Pilot", "description": "Achieve a score of 50 or more in one game", "target": 50, "progress": 0, "completed": False},
-        {"title": "Expert Aviator", "description": "Achieve a score of 100 or more in one game", "target": 100, "progress": 0, "completed": False},
-        {"title": "High Flyer", "description": "Achieve a score of 200 or more in one game", "target": 200, "progress": 0, "completed": False},
-        {"title": "Persistence Pays", "description": "Play 100 games", "target": 100, "progress": 0, "completed": False},
-        {"title": "Dedicated Player", "description": "Play 500 games", "target": 500, "progress": 0, "completed": False},
-        {"title": "True Fan", "description": "Play 1000 games", "target": 1000, "progress": 0, "completed": False},
-        {"title": "Marathon Runner", "description": "Achieve a score of 10 000 points across all games", "target": 10000, "progress": 0, "completed": False}
-    ]}
-     achievements_col.insert_one(data)
+     date_today = datetime.today().strftime('%Y-%m-%d')
+     filter = {"user": username}
+     test = achievements_col.find_one(filter)
+     basic = test["Basic achievements"]
+     milestone = test["Milestone achievements"]
+     update = None
+     for value in basic:
+          progress = value.get("progress")
+          completed = value.get("completed")
+          title = value.get("title")
+          target = value.get("target")
+          filter2 = {"user": username, f"Basic achievements.title": title}
+          if not completed and score > progress:
+                if score >= target:
+                    update = {"$set": {f'Basic achievements.$.progress': score, f'Basic achievements.$.completed': True, f'Basic achievements.$.completion_date': date_today}}
+                else:
+                    update = {"$set": {f'Basic achievements.$.progress': score}}
+                achievements_col.update_one(filter2, update)
+     for value in milestone:
+          progress = value.get("progress")
+          completed = value.get("completed")
+          title = value.get("title")
+          target = value.get("target")
+          filter2 = {"user": username, f"Milestone achievements.title": title}
+          val = 1
+          if not completed:
+                if title == "Marathon Runner":
+                    val = score
+                if score >= target:
+                    update = {"$inc": {f'Milestone achievements.$.progress': val, f'Milestone achievements.$.completed': True, f'Basic achievements.$.completion_date': date_today}}
+                else:
+                    update = {"$inc": {f'Milestone achievements.$.progress': val}}
+                achievements_col.update_one(filter2, update)
+
 
 def check_and_create_collection(client: MongoClient, col_name):
         mydb = client["FlappyMule"]
